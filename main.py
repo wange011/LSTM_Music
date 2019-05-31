@@ -15,9 +15,10 @@ music_directory = working_directory + "/training/piano/"
 midi_directories = ["albeniz"]
 #, "beeth", "borodin", "brahms", "burgm", "chopin", "debussy", "granados", "grieg", "haydn", "liszt", "mendelssohn", "mozart", "muss", "schubert", "schumann", "tschai"]
 max_time_steps = 256 # only files at least this many 16th note steps are saved
-num_validation_pieces = 1
+num_testing_pieces = 1
 
 # MIDI files are converted to Note State
+
 """
 Note State:
 
@@ -26,6 +27,7 @@ Dimension 2: Notes played, Piano Roll notation contained in a 78 dimension 1-hot
 Dimension 3: Articulation (1 denotes the note was played at the given timestep), contained in a 78 dimension 1-hot vector
 
 """
+
 # Gather the training pieces from the specified directories
 training = {}
 for i in range(len(midi_directories)):
@@ -35,26 +37,26 @@ for i in range(len(midi_directories)):
 
 # Set aside a random set of pieces for testing
 testing = {}
-for i in range(num_validation_pieces):
+for i in range(num_testing_pieces):
     index = random.choice(list(training.keys()))
     testing[index] = training.pop(index)
 
 # Use utility.getPieceBatch(training_set, batch_size, time_steps)[1] to get batch
 
+tf.reset_default_graph()
+
 # Input dimensions
-timesteps = 16
 input_dim = 78 * 2
 
 # Hyperparameters
 learning_rate = 0.001
-training_steps = 10000
-batch_size = 15
-num_hidden = [100, 100, 100, 100]
+training_steps = 60
+num_hidden = [200, 200, 100, 100]
 num_layers = 2
 
-# Here None is the batch_size
+# Here None is the batch_size, timesteps
 # Define the Graph Input
-X = tf.placeholder("float", [None, timesteps, input_dim])
+X = tf.placeholder("float", [None, None, input_dim])
 
 # !!!!!!!Define the weight matrices, use LSTMStateTuple to pass in the weights as LSTM States
 # tf.nn.dynamic_rnn outputs output and cell_state
@@ -62,35 +64,56 @@ X = tf.placeholder("float", [None, timesteps, input_dim])
 
 
 # 2 consectutive 2 layer LSTMs
-# Decide how to separate the 2 parameters: note played and articulation
-h = model.TimewiseLSTM(X, num_hidden[:num_layers - 1])
-outputs = model.NotewiseLSTM(h, num_hidden[num_layers:])
+# Uses the Biaxial model
+outputs = model.TimewiseLSTM(X, num_hidden[:num_layers - 1])
+#outputs = model.NotewiseLSTM(h, num_hidden[num_layers:])
 
 # Define loss and optimizer
-loss = model.LossFunction(outputs, X, batch_size, timesteps, input_dim)
-optimizer = tf.train.GradientDescentOptimizer(learning_rate = learning_rate)
+# Returns the cross entropy loss based upon the next note to be played
+loss, log_likelihood = model.LossFunction(outputs, X, input_dim)
+# Using the Adam optimizer for now
+optimizer = tf.train.AdamOptimizer(learning_rate = learning_rate)
 train_op = optimizer.minimize(loss)
 
 # Training
-display_step = 100
+display_step = 20
+losses = []
 
-init = tf.global_variables_intitializer()
+# Initialize the variables for the computational graph
+init = tf.global_variables_initializer()
 
-with tf.session() as sess:
+# Add ops to save and restore all the variables.
+saver = tf.train.Saver()
+
+timesteps = 16
+batch_size = 15
+
+with tf.Session() as sess:
     
+    print("Starting Training")
     sess.run(init)
 
     for step in range(1, training_steps + 1):
         
-        # Get batch of shape
+        
+        # Get batch of shape [batch_size, timesteps, num_notes, 2]
+        # Corresponds with values for (batch, timestep, note_played, articulation)
         batch = utility.getPieceBatch(training, batch_size, timesteps)[1]
         
-        # !!!!Reshape batch
+        # Reshape to match input dimensions
+        batch = np.reshape(batch, [batch_size, timesteps, input_dim])
         
-        
-        loss = sess.run(train_op, feed_dict={X: batch})
+        loss_run, log_likelihood_run, _ = sess.run([loss, log_likelihood, train_op], feed_dict={X: batch})
+        losses.append(loss_run)        
         
         if step % display_step == 0 or step == 1:
+
+            # To restore model during training: saver.restore(sess, "/tmp/model.ckpt")
+            
+            # Saves the model            
+            save_path = saver.save(sess, working_directory + "/saved_models/model_" + str(step) + "_iterations.ckpt")            
+            
             # Calculate batch loss and accuracy
-            print("Step " + str(step) + ", Loss= " + \
-                  "{:.4f}".format(loss))
+            print("Step " + str(step) + ", Loss= " + str(loss_run))
+
+# Generate new music
