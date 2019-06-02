@@ -14,7 +14,7 @@ def TimewiseLSTM(X, num_hidden):
     timewise_multi_lstm_cell = rnn.MultiRNNCell(cell_list)    
     
     outputs, states = tf.nn.dynamic_rnn(timewise_multi_lstm_cell, X, dtype=tf.float32)
-    
+
     return outputs
     
 def NotewiseLSTM(h, num_hidden):

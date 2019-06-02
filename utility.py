@@ -1,5 +1,6 @@
 import os, random
 import numpy as np
+import tensorflow as tf
 from data_formating import *
 
 def loadPieces(dirpath, max_time_steps):
@@ -39,5 +40,19 @@ def getPieceSegment(pieces, num_time_steps):
 def getPieceBatch(pieces, batch_size, num_time_steps):
     i,o = zip(*[getPieceSegment(pieces, num_time_steps) for _ in range(batch_size)])
     return np.array(i), np.array(o)
+
+def getSampleTimestep(notes, articulation):
+    notes = tf.convert_to_tensor(notes)
+    notes = tf.distributions.Bernoulli(logits=notes).sample().eval()
+
+    for i in range(len(notes)):
+        if notes[i] == 0:
+            articulation[i] = 0
     
+    articulation = tf.convert_to_tensor(articulation)
+    articulation = tf.distributions.Bernoulli(logits=articulation).sample().eval()
     
+    return np.vstack((notes, articulation)).T
+
+def generateMIDI(piece):
+    noteStateMatrixToMidi(piece)            
