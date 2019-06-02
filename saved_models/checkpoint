@@ -1,5 +1,2 @@
-model_checkpoint_path: "C:\\Users\\Ethan Wang\\Documents\\2CS\\Projects\\3Research\\LSTM_Music/saved_models/model_60_iterations.ckpt"
+model_checkpoint_path: "C:\\Users\\Ethan Wang\\Documents\\2CS\\Projects\\3Research\\LSTM_Music/saved_models/model_1_iterations.ckpt"
 all_model_checkpoint_paths: "C:\\Users\\Ethan Wang\\Documents\\2CS\\Projects\\3Research\\LSTM_Music/saved_models/model_1_iterations.ckpt"
-all_model_checkpoint_paths: "C:\\Users\\Ethan Wang\\Documents\\2CS\\Projects\\3Research\\LSTM_Music/saved_models/model_20_iterations.ckpt"
-all_model_checkpoint_paths: "C:\\Users\\Ethan Wang\\Documents\\2CS\\Projects\\3Research\\LSTM_Music/saved_models/model_40_iterations.ckpt"
-all_model_checkpoint_paths: "C:\\Users\\Ethan Wang\\Documents\\2CS\\Projects\\3Research\\LSTM_Music/saved_models/model_60_iterations.ckpt"

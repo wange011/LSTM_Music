@@ -1,12 +1,16 @@
 import tensorflow as tf
 import numpy as np
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 
 import os 
 import random
 
 import utility
 import model
+
+
+from tensorflow.python.client import device_lib
+print(device_lib.list_local_devices())
 
 # Parse throught the training MIDI files
 working_directory = os.getcwd()
