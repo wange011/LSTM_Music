@@ -54,7 +54,7 @@ input_dim = 78 * 2
 
 # Hyperparameters
 learning_rate = 0.001
-training_steps = 10000
+training_steps = 5000
 num_hidden = [200, input_dim]
 num_layers = 2
 
