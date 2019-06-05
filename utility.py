@@ -3,6 +3,28 @@ import numpy as np
 import tensorflow as tf
 from data_formating import *
 
+def loadPianoPieces():
+    working_directory = os.getcwd()
+    music_directory = working_directory + "/training/piano/"
+
+    midi_directories = ["albeniz", "beeth", "borodin", "brahms", "burgm", "chopin", "debussy", "granados", "grieg", "haydn", "liszt", "mendelssohn", "mozart", "muss", "schubert", "schumann", "tschai"]
+    max_time_steps = 256 # only files at least this many 16th note steps are saved
+    num_testing_pieces = 10
+    
+    training = {}
+    for i in range(len(midi_directories)):
+        folder = music_directory + midi_directories[i]
+        training = {**training, **loadPieces(folder, max_time_steps)}
+
+
+    # Set aside a random set of pieces for testing
+    testing = {}
+    for i in range(num_testing_pieces):
+        index = random.choice(list(training.keys()))
+        testing[index] = training.pop(index)
+
+    return training, testing
+
 def loadPieces(dirpath, max_time_steps):
     pieces = {}
 
@@ -40,19 +62,6 @@ def getPieceSegment(pieces, num_time_steps):
 def getPieceBatch(pieces, batch_size, num_time_steps):
     i,o = zip(*[getPieceSegment(pieces, num_time_steps) for _ in range(batch_size)])
     return np.array(i), np.array(o)
-
-def getSampleTimestep(notes, articulation):
-    notes = tf.convert_to_tensor(notes)
-    notes = tf.distributions.Bernoulli(logits=notes).sample().eval()
-
-    for i in range(len(notes)):
-        if notes[i] == 0:
-            articulation[i] = 0
-    
-    articulation = tf.convert_to_tensor(articulation)
-    articulation = tf.distributions.Bernoulli(logits=articulation).sample().eval()
-    
-    return np.vstack((notes, articulation)).T
 
 def generateMIDI(piece):
     noteStateMatrixToMidi(piece)            

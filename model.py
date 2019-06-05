@@ -1,6 +1,11 @@
 import tensorflow as tf
 from tensorflow.contrib import rnn
 
+
+def BiaxialRNN():
+    
+    return outputs
+
 # Try dropout
 def TimewiseLSTM(X, num_hidden):
     
