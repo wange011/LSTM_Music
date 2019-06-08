@@ -1,4 +1,4 @@
-import midi, numpy
+import midi, numpy as np
 import itertools
 
 lowerBound = 24
@@ -63,7 +63,7 @@ def midiToNoteStateMatrix(midifile):
     return statematrix
 
 def noteStateMatrixToMidi(statematrix, name="example"):
-    statematrix = numpy.asarray(statematrix)
+    statematrix = np.asarray(statematrix)
     pattern = midi.Pattern()
     track = midi.Track()
     pattern.append(track)
@@ -155,3 +155,66 @@ def noteStateMatrixToInputForm(statematrix):
     #[startSentinel()] + 
     inputform = [ noteStateSingleToInputForm(state,time) for time,state in enumerate(statematrix) ]
     return inputform    
+
+"""
+Returns the Note State Matrix with the following dimensions:
+
+Position [Size 1]:
+Pitchclass [12]:
+Previous Vicinity [24]:
+Previous Context [12]:
+Beat [4]:
+
+Labels:
+Played
+Articulated
+
+Output should have shape (timesteps, num_notes, 1 + 12 + 24 + 12 + 4 = 53)
+"""    
+def noteStateToBiaxialInput(statematrix):
+    
+    biaxial_input = np.zeros((len(statematrix), 78, 55))   
+    
+    beat = [[0, 0, 0, 0], [1, 0, 0, 0], [0, 1, 0, 0], [1, 1, 0, 0],
+            [0, 0, 1, 0], [1, 0, 1, 0], [0, 1, 1, 0], [1, 1, 1, 0],
+            [0, 0, 0, 1], [1, 0, 0, 1], [0, 1, 0, 1], [1, 1, 0, 1],
+            [0, 0, 1, 1], [1, 0, 1, 1], [0, 1, 1, 1], [1, 1, 1, 1]]  
+    
+    for timestep in range(len(statematrix)):
+         
+        for note in range(len(statematrix[0])):
+             
+            note_matrix = []
+             
+            note_matrix.append(note)
+            note_matrix.extend([1 if x == note % 12 else 0 for x in range(12)])
+            
+            prev_vicinity = [0 for x in range(24)]
+            if (timestep != 0):
+                
+                for i in range(len(statematrix[timestep - 1])):                
+                    
+                    if statematrix[timestep - 1][i][0] == 1:
+                        prev_vicinity[2*((note - i) % 12)] = 1
+                    
+                    if statematrix[timestep - 1][i][1] == 1:
+                        prev_vicinity[2*((note - i) % 12) + 1] = 1
+                
+            note_matrix.extend(prev_vicinity)
+            
+            prev_context = [0 for x in range(12)]
+            if (timestep != 0):
+                
+                for i in range(len(statematrix[timestep - 1])):                
+                    
+                    if statematrix[timestep - 1][i][0] == 1:
+                        prev_context[(note - i) % 12] = prev_context[(note - i) % 12] + 1
+                         
+            note_matrix.extend(prev_context)
+            note_matrix.extend(beat[timestep % 16])
+            note_matrix.append(statematrix[timestep][note][0])            
+            note_matrix.append(statematrix[timestep][note][0])            
+            
+            biaxial_input[timestep][note] = np.array(note_matrix)
+
+    return biaxial_input            

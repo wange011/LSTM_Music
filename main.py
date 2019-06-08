@@ -23,7 +23,7 @@ Dimension 3: Articulation (1 denotes the note was played at the given timestep),
 # Gather the training pieces from the specified directories
 # Saved with dimensions (timesteps, notes_played, articulation)
 training, testing = utility.loadPianoPieces()
-
+print(training['alb_esp2'].shape)
 # Use utility.getPieceBatch(training_set, batch_size, time_steps)[1] to get batch
 
 tf.reset_default_graph()

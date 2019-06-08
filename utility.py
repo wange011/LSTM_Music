@@ -7,9 +7,10 @@ def loadPianoPieces():
     working_directory = os.getcwd()
     music_directory = working_directory + "/training/piano/"
 
-    midi_directories = ["albeniz", "beeth", "borodin", "brahms", "burgm", "chopin", "debussy", "granados", "grieg", "haydn", "liszt", "mendelssohn", "mozart", "muss", "schubert", "schumann", "tschai"]
+    midi_directories = ["albeniz"]
+    #, "beeth", "borodin", "brahms", "burgm", "chopin", "debussy", "granados", "grieg", "haydn", "liszt", "mendelssohn", "mozart", "muss", "schubert", "schumann", "tschai"]
     max_time_steps = 256 # only files at least this many 16th note steps are saved
-    num_testing_pieces = 10
+    num_testing_pieces = 0
     
     training = {}
     for i in range(len(midi_directories)):
@@ -22,7 +23,13 @@ def loadPianoPieces():
     for i in range(num_testing_pieces):
         index = random.choice(list(training.keys()))
         testing[index] = training.pop(index)
+    
+    for key in training.keys():
+        training[key] = noteStateToBiaxialInput(training[key])
 
+    for key in testing.keys():
+        testing[key] = noteStateToBiaxialInput(testing[key])    
+    
     return training, testing
 
 def loadPieces(dirpath, max_time_steps):
@@ -44,7 +51,7 @@ def loadPieces(dirpath, max_time_steps):
             continue
 
         pieces[name] = outMatrix
-        print ("Loaded {}".format(name))
+        # print ("Loaded {}".format(name))
     return pieces
 
 division_len = 16
