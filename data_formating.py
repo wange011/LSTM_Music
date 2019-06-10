@@ -169,9 +169,9 @@ Labels:
 Played
 Articulated
 
-Output should have shape (timesteps, num_notes, 1 + 12 + 24 + 12 + 4 = 53)
+Output should have shape (timesteps, num_notes, 1 + 12 + 24 + 12 + 4 + 2 = 55)
 """    
-def noteStateToBiaxialInput(statematrix):
+def noteStateToBiaxialInput(statematrix, timestep_num = 0):
     
     biaxial_input = np.zeros((len(statematrix), 78, 55))   
     
@@ -211,7 +211,7 @@ def noteStateToBiaxialInput(statematrix):
                         prev_context[(note - i) % 12] = prev_context[(note - i) % 12] + 1
                          
             note_matrix.extend(prev_context)
-            note_matrix.extend(beat[timestep % 16])
+            note_matrix.extend(beat[(timestep + timestep_num) % 16])
             note_matrix.append(statematrix[timestep][note][0])            
             note_matrix.append(statematrix[timestep][note][0])            
             

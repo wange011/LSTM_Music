@@ -1,11 +1,11 @@
 import tensorflow as tf
-import numpy as np
-#import matplotlib.pyplot as plt
 
 import os 
 
 import utility
 import model
+import training
+import generate_music
 
 working_directory = os.getcwd()
 
@@ -22,87 +22,45 @@ Dimension 3: Articulation (1 denotes the note was played at the given timestep),
 
 # Gather the training pieces from the specified directories
 # Saved with dimensions (timesteps, notes_played, articulation)
-training, testing = utility.loadPianoPieces()
-print(training['alb_esp2'].shape)
-# Use utility.getPieceBatch(training_set, batch_size, time_steps)[1] to get batch
+training_set, testing_set = utility.loadPianoPieces()
+
 
 tf.reset_default_graph()
 
-# Input dimensions
-input_dim = 78 * 2
 
-# Hyperparameters
-learning_rate = 0.001
-training_steps = 500
-num_hidden = [200, input_dim]
-num_layers = 2
+X = tf.placeholder("float", [None, None, None])
+time_hidden_layer_size = tf.placeholder("int", [2])
 
-# Here None is the batch_size, timesteps
-# Define the Graph Input
-X = tf.placeholder("float", [None, None, input_dim])
-
-# !!!!!!!Define the weight matrices, use LSTMStateTuple to pass in the weights as LSTM States
-# tf.nn.dynamic_rnn outputs output and cell_state
-# Use MultiRNNCell to instantiate multilayer LSTM (pass in cell_list)
+time_block_outputs = model.BiaxialTimeBlock(X, time_hidden_layer_size)
 
 
-# 2 consectutive 2 layer LSTMs
-# Uses the Biaxial model
-outputs = model.TimewiseLSTM(X, num_hidden[:num_layers])
-#outputs = model.NotewiseLSTM(h, num_hidden[num_layers:])
+hidden_state = tf.placeholder("float", [None, None, None])
+y = tf.placeholder("float", [None, None, None])
+note_hidden_layer_size = tf.placeholder("int", [2])
 
-# Define loss and optimizer
-# Returns the cross entropy loss based upon the next note to be played
-loss, log_likelihood = model.LossFunction(outputs, X, input_dim)
-# Using the Adam optimizer for now
-optimizer = tf.train.AdamOptimizer(learning_rate = learning_rate)
-train_op = optimizer.minimize(log_likelihood)
+outputs = model.BiaxialNoteBlock(hidden_state, y, note_hidden_layer_size)
 
-# Training
-display_step = 50
-losses = []
-
-# Initialize the variables for the computational graph
-init = tf.global_variables_initializer()
-
-# Add ops to save and restore all the variables.
-saver = tf.train.Saver()
-
-timesteps = 16
-batch_size = 15
+loss = model.BiaxialLoss(outputs, y)
+optimizer = tf.train.AdamOptimizer()
+train_op = optimizer.minimize(loss)
 
 
-with tf.Session() as sess:
+model_name = "BiaxialLSTM"
+
+# Training the model
+training_parameters = {"timesteps": 16, "batch_size": 15, "training_steps": 2000, "display_step": 200}
+model_parameters = {"time_hidden_layer_size" : [300, 300], "note_hidden_layer_size": [100, 50]}
+
+training.train(model_name, training_set, X, time_hidden_layer_size, time_block_outputs, hidden_state, y, note_hidden_layer_size, loss, training_parameters, model_parameters)
+
+
+# Generating output samples
+for i in range(1, training_parameters["training_steps"] / (2 * training_parameters["display_step"]) + 1):
+
+    steps_trained = i * 2 * training_parameters["display_step"]    
     
-    print("Starting Training")
-    sess.run(init)
-
-    for step in range(1, training_steps + 1):
-        
-        
-        # Get batch of shape [batch_size, timesteps, num_notes, 2]
-        # Corresponds with values for (batch, timestep, note_played, articulation)
-        batch = utility.getPieceBatch(training, batch_size, timesteps)[1]
-        
-        # Reshape to match input dimensions
-        batch = np.reshape(batch, [batch_size, timesteps, input_dim])
-        
-        loss_run, log_likelihood_run, _ = sess.run([loss, log_likelihood, train_op], feed_dict={X: batch})
-        losses.append(loss_run)        
-        
-        if step % display_step == 0 or step == 1:
-
-            # To restore model during training: saver.restore(sess, "/tmp/model.ckpt")
-            
-            # Saves the model            
-            save_path = saver.save(sess, working_directory + "/saved_models/model_" + str(step) + "_iterations.ckpt")            
-            
-            # Calculate batch loss and accuracy
-            print("Step " + str(step) + ", Loss= " + str(loss_run) + ", Log Likelihood= " + str(log_likelihood_run))
-            
-
-# Load
-# Model
-# Loss
-# Train
-# Generate
+    output_parameters = {"steps_trained": steps_trained, "num_pieces": 5, "timesteps": 100}
+    pieces = generate_music.generatePieces(model_name, time_block_outputs, X, hidden_state, y, outputs, output_parameters)
+    
+    for j in range(len(pieces)):
+        utility.generateMIDI(pieces[j], model_name + "_" + steps_trained + "_iterations_" + str(j + 1))

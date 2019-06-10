@@ -5,7 +5,7 @@ from data_formating import *
 
 def loadPianoPieces():
     working_directory = os.getcwd()
-    music_directory = working_directory + "/training/piano/"
+    music_directory = working_directory + "/training_sets/piano/"
 
     midi_directories = ["albeniz"]
     #, "beeth", "borodin", "brahms", "burgm", "chopin", "debussy", "granados", "grieg", "haydn", "liszt", "mendelssohn", "mozart", "muss", "schubert", "schumann", "tschai"]
@@ -70,5 +70,9 @@ def getPieceBatch(pieces, batch_size, num_time_steps):
     i,o = zip(*[getPieceSegment(pieces, num_time_steps) for _ in range(batch_size)])
     return np.array(i), np.array(o)
 
-def generateMIDI(piece):
-    noteStateMatrixToMidi(piece)            
+def generateMIDI(piece, name):
+    working_directory = os.getcwd()
+    output_directory = working_directory + "/sample_outputs/"
+    output_name = output_directory + name    
+    
+    noteStateMatrixToMidi(piece, output_name)            

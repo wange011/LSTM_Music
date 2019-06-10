@@ -2,7 +2,7 @@ import tensorflow as tf
 from tensorflow.contrib import rnn
 
 
-def BiaxialRNN(inputs, time_hidden_layer_size, note_hidden_layer_size, labels):
+def BiaxialTimeBlock(inputs, time_hidden_layer_size):
     
     # Input Dimensions: (song_batch_size, song_timesteps, 78, input_dim)
     song_batch_size = len(inputs) 
@@ -40,6 +40,14 @@ def BiaxialRNN(inputs, time_hidden_layer_size, note_hidden_layer_size, labels):
     
     time_block_outputs = time_block(time_block_inputs)    
     
+    return time_block_outputs
+
+def BiaxialNoteBlock(hidden_state, labels, note_hidden_layer_size):
+
+    song_batch_size = len(labels) 
+    song_timesteps = len(labels[0])
+    num_notes = len(labels[0][0])  
+    
     """
     Note Block:
     2 layer LSTM with recurrent connections along the note axis
@@ -57,22 +65,8 @@ def BiaxialRNN(inputs, time_hidden_layer_size, note_hidden_layer_size, labels):
 
     Outputs will be of dimension: (batch_size, timesteps, state_size)
     """
-
-    # Convert the outputs of the time block to the input shape of the note block
-    time_block_outputs = tf.reshape(time_block_outputs, [song_batch_size, 78, song_timesteps, time_hidden_layer_size[-1]])
-    time_block_outputs = tf.transpose(time_block_outputs, perm=[2, 0, 1, 3])    
-    time_block_outputs = tf.reshape(time_block_outputs, [song_timesteps * song_batch_size, 78, time_hidden_layer_size[-1]])    
     
-    # Append Previous Note Played and Previous Note Articulated
-    labels = tf.slice(labels, [0, 0, 0, 0], [song_batch_size, song_timesteps, 77, 2])
-    zeros = tf.zeros([song_batch_size, song_timesteps, 1, 2])
-
-    labels = tf.concat([zeros, labels], 2)    
-    
-    labels = tf.reshape(labels, [song_timesteps * song_batch_size, 78, 2])
-    
-    
-    note_block_inputs = tf.concat([time_block_outputs, labels], 2)
+    note_block_inputs = tf.concat([hidden_state, labels], 2)
           
     notewise_lstm_stack = tf.keras.layers.StackedRNNCells([tf.keras.layers.LSTMCell(n, dropout=.5) for n in note_hidden_layer_size])    
     
@@ -89,15 +83,15 @@ def BiaxialRNN(inputs, time_hidden_layer_size, note_hidden_layer_size, labels):
     Final output will consist of 2 values for each note:
     (note_played, note_articulated)
     
-    Outputs will be of dimension: (song_batch_size, song_timesteps, 78, 2)
+    Outputs will be of dimension: (song_batch_size, song_timesteps, num_notes, 2)
     """    
      # Convert the outputs of the note block to the input shape of the Dense layer
-    note_block_outputs = tf.reshape(note_block_outputs, [song_batch_size, song_timesteps, 78, note_hidden_layer_size[-1]])
+    note_block_outputs = tf.reshape(note_block_outputs, [song_batch_size, song_timesteps, num_notes, note_hidden_layer_size[-1]])
     
     dense_layer = tf.keras.layers.Dense(2, activation=tf.keras.activations.sigmoid)
     
     outputs = dense_layer(note_block_outputs)
-    
+
     return outputs
 
 def BiaxialLoss(outputs, labels):
