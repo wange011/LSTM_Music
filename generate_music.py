@@ -35,7 +35,7 @@ def generatePieces(model_name, time_block_outputs, X, hidden_state, y, outputs, 
             # where batch_size is each individual note for every song in the song batch (78 * song_batch_size)            
             time_block_outputs_run = sess.run([time_block_outputs], feed_dict={X: current_timestep_input})
             
-            hidden_state_size = len(time_block_outputs_run[0][0][0])            
+            hidden_state_size = tf.size(time_block_outputs_run)[2]            
             
             time_block_outputs_run = tf.reshape(time_block_outputs_run, [78, num_pieces, 1, hidden_state_size])            
             
@@ -105,7 +105,7 @@ def randomTimestep(batch_size):
 # Accounts for dropout (.5 during training) by multiplying output by .5
 def sampleFromOutputs(outputs):
     
-    batch_size = len(outputs)
+    batch_size = outputs.get_shape().as_list()[0]
     
     sample = np.zeros((batch_size, 1, 2))
     

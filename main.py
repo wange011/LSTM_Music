@@ -27,18 +27,21 @@ training_set, testing_set = utility.loadPianoPieces()
 
 tf.reset_default_graph()
 
+timesteps = 16
+batch_size = 1
+epochs = 1
 
-X = tf.placeholder("float", [None, None, None])
-time_hidden_layer_size = tf.placeholder("int", [2])
+X = tf.placeholder("float", [batch_size, timesteps, 78, 53])
+time_hidden_layer_size = [300, 300]
 
 time_block_outputs = model.BiaxialTimeBlock(X, time_hidden_layer_size)
 
 
-hidden_state = tf.placeholder("float", [None, None, None])
-y = tf.placeholder("float", [None, None, None])
-note_hidden_layer_size = tf.placeholder("int", [2])
+hidden_state = tf.placeholder("float", [batch_size * timesteps, None, 300])
+y = tf.placeholder("float", [batch_size * timesteps, None, 2])
+note_hidden_layer_size = [100, 50]
 
-outputs = model.BiaxialNoteBlock(hidden_state, y, note_hidden_layer_size)
+outputs = model.BiaxialNoteBlock(hidden_state, y, note_hidden_layer_size, batch_size, timesteps)
 
 loss = model.BiaxialLoss(outputs, y)
 optimizer = tf.train.AdamOptimizer()
@@ -48,10 +51,9 @@ train_op = optimizer.minimize(loss)
 model_name = "BiaxialLSTM"
 
 # Training the model
-training_parameters = {"timesteps": 16, "batch_size": 15, "training_steps": 2000, "display_step": 200}
-model_parameters = {"time_hidden_layer_size" : [300, 300], "note_hidden_layer_size": [100, 50]}
+training_parameters = {"timesteps": timesteps, "batch_size": batch_size, "training_steps": epochs, "display_step": 100}
 
-training.train(model_name, training_set, X, time_hidden_layer_size, time_block_outputs, hidden_state, y, note_hidden_layer_size, loss, training_parameters, model_parameters)
+training.train(model_name, training_set, X, time_hidden_layer_size, time_block_outputs, hidden_state, y, note_hidden_layer_size, loss, training_parameters)
 
 
 # Generating output samples

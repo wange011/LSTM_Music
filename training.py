@@ -4,7 +4,7 @@ import os
 
 import utility
 
-def train(model_name, training_set, time_block_outputs, X, time_hidden_layer_size, hidden_state, y, note_hidden_layer_size, loss, training_parameters, model_parameters):
+def train(model_name, training_set, time_block_outputs, X, hidden_state, y, loss, training_parameters):
     
     working_directory = os.getcwd()
     
@@ -12,10 +12,7 @@ def train(model_name, training_set, time_block_outputs, X, time_hidden_layer_siz
     batch_size = training_parameters["batch_size"]
     training_steps = training_parameters["training_steps"]
     display_step = training_parameters["display_step"]    
-    
-    time_layer_size = model_parameters["time_hidden_layer_size"]    
-    note_layer_size = model_parameters["note_hidden_layer_size"]
-    
+        
     # Initialize the variables for the computational graph
     init = tf.global_variables_initializer()
     
@@ -37,11 +34,11 @@ def train(model_name, training_set, time_block_outputs, X, time_hidden_layer_siz
             inputs = batch[:, :, :, :53]
             labels = batch[:, :, :, 53:]
             
-            time_block_outputs_run = sess.run([time_block_outputs], feed_dict={X: inputs, note_hidden_layer_size: note_layer_size})
+            time_block_outputs_run = sess.run([time_block_outputs], feed_dict={X: inputs})
 
-            time_block_outputs_run = tf.reshape(time_block_outputs_run, [batch_size, 78, timesteps, len(time_block_outputs_run[0][0])])
+            time_block_outputs_run = tf.reshape(time_block_outputs_run, [batch_size, 78, timesteps, time_block_outputs_run.get_shape().as_list()[2]])
             time_block_outputs_run = tf.transpose(time_block_outputs_run, perm=[2, 0, 1, 3])    
-            time_block_outputs_run = tf.reshape(time_block_outputs_run, [timesteps * batch_size, 78, len(time_block_outputs_run[0][0])])    
+            time_block_outputs_run = tf.reshape(time_block_outputs_run, [timesteps * batch_size, 78, time_block_outputs_run.get_shape().as_list()[2]])    
             
             # Append Previous Note Played and Previous Note Articulated
             labels = tf.slice(labels, [0, 0, 0, 0], [batch_size, timesteps, 77, 2])
@@ -50,11 +47,9 @@ def train(model_name, training_set, time_block_outputs, X, time_hidden_layer_siz
             labels = tf.concat([zeros, labels], 2)    
             
             labels = tf.reshape(labels, [timesteps * batch_size, 78, 2])
+                    
             
-            
-            note_block_inputs = tf.concat([time_block_outputs, labels], 2)            
-            
-            loss_run = sess.run([loss], feed_dict={hidden_state: note_block_inputs, y: labels, time_hidden_layer_size: time_layer_size})      
+            loss_run = sess.run([loss], feed_dict={hidden_state: time_block_outputs_run, y: labels})      
             
             if step % display_step == 0 or step == 1:
     
@@ -66,7 +61,8 @@ def train(model_name, training_set, time_block_outputs, X, time_hidden_layer_siz
                 # Calculate batch loss and accuracy
                 print("Step " + str(step) + ", Loss= " + str(loss_run))
                 
-                
+
+"""                
 def resumeTraining(model_name, training_set, steps_trained, time_block_outputs, loss, X, hidden_state, y, timesteps, batch_size, remaining_training_steps):
 
     # Finds the most recent saved model
@@ -96,9 +92,9 @@ def resumeTraining(model_name, training_set, steps_trained, time_block_outputs, 
             
             time_block_outputs_run = sess.run([time_block_outputs], feed_dict={X: inputs})
 
-            time_block_outputs_run = tf.reshape(time_block_outputs_run, [batch_size, 78, timesteps, len(time_block_outputs_run[0][0])])
+            time_block_outputs_run = tf.reshape(time_block_outputs_run, [batch_size, 78, timesteps, time_block_outputs_run.get_shape().as_list()[2]])
             time_block_outputs_run = tf.transpose(time_block_outputs_run, perm=[2, 0, 1, 3])    
-            time_block_outputs_run = tf.reshape(time_block_outputs_run, [timesteps * batch_size, 78, len(time_block_outputs_run[0][0])])    
+            time_block_outputs_run = tf.reshape(time_block_outputs_run, [timesteps * batch_size, 78, time_block_outputs_run.get_shape().as_list()[2]])    
             
             # Append Previous Note Played and Previous Note Articulated
             labels = tf.slice(labels, [0, 0, 0, 0], [batch_size, timesteps, 77, 2])
@@ -123,4 +119,4 @@ def resumeTraining(model_name, training_set, steps_trained, time_block_outputs, 
                 
                 # Calculate batch loss and accuracy
                 print("Step " + str(step) + ", Loss= " + str(loss_run))                
-                
+"""                
