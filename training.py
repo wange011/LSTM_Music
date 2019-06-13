@@ -1,4 +1,5 @@
 import tensorflow as tf
+import numpy as np
 
 import os 
 
@@ -33,23 +34,9 @@ def train(model_name, training_set, time_block_outputs, X, hidden_state, y, loss
             
             inputs = batch[:, :, :, :53]
             labels = batch[:, :, :, 53:]
-            
-            time_block_outputs_run = sess.run([time_block_outputs], feed_dict={X: inputs})
 
-            time_block_outputs_run = tf.reshape(time_block_outputs_run, [batch_size, 78, timesteps, time_block_outputs_run.get_shape().as_list()[2]])
-            time_block_outputs_run = tf.transpose(time_block_outputs_run, perm=[2, 0, 1, 3])    
-            time_block_outputs_run = tf.reshape(time_block_outputs_run, [timesteps * batch_size, 78, time_block_outputs_run.get_shape().as_list()[2]])    
-            
-            # Append Previous Note Played and Previous Note Articulated
-            labels = tf.slice(labels, [0, 0, 0, 0], [batch_size, timesteps, 77, 2])
-            zeros = tf.zeros([batch_size, timesteps, 1, 2])
-        
-            labels = tf.concat([zeros, labels], 2)    
-            
-            labels = tf.reshape(labels, [timesteps * batch_size, 78, 2])
-                    
-            
-            loss_run = sess.run([loss], feed_dict={hidden_state: time_block_outputs_run, y: labels})      
+          
+            loss_run, = sess.run([loss], feed_dict={X: inputs, hidden_state: np.zeros((batch_size * timesteps, 78, 300)), y: labels})                
             
             if step % display_step == 0 or step == 1:
     

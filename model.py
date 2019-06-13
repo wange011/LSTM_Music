@@ -1,14 +1,14 @@
 import tensorflow as tf
-from tensorflow.contrib.rnn import BasicLSTMCell
-from tensorflow.contrib.rnn import DropoutWrapper
+#from tensorflow.contrib.rnn import BasicLSTMCell
+#from tensorflow.contrib.rnn import DropoutWrapper
 
 
-def BiaxialTimeBlock(inputs, time_hidden_layer_size):
+def BiaxialTimeBlock(X, time_hidden_layer_size):
     
     # Input Dimensions: (song_batch_size, song_timesteps, 78, input_dim)
-    song_batch_size = inputs.get_shape().as_list()[0] 
-    song_timesteps = inputs.get_shape().as_list()[1] 
-    input_dim = inputs.get_shape().as_list()[3] 
+    song_batch_size = X.get_shape().as_list()[0] 
+    song_timesteps = X.get_shape().as_list()[1] 
+    input_dim = X.get_shape().as_list()[3] 
 
     """
     Time Block:
@@ -30,7 +30,7 @@ def BiaxialTimeBlock(inputs, time_hidden_layer_size):
 
     """ 
     # Reshaping the inputs
-    time_block_inputs = tf.transpose(inputs, perm=[0, 2, 1, 3])
+    time_block_inputs = tf.transpose(X, perm=[0, 2, 1, 3])
     time_block_inputs = tf.reshape(time_block_inputs, [song_batch_size * 78, song_timesteps, input_dim])
 
     #time_block_inputs = tf.keras.Input((song_batch_size * 78, song_timesteps, input_dim), tensor=time_block_inputs)    
@@ -39,22 +39,22 @@ def BiaxialTimeBlock(inputs, time_hidden_layer_size):
 
     for i in range(2):
         
-        timewise_lstm_stack.append(tf.keras.layers.LSTMCell(time_hidden_layer_size[i], dropout=.5))
+        timewise_lstm_stack.append(tf.keras.layers.LSTMCell(time_hidden_layer_size[i]))
         
         #timewise_lstm_stack.append(DropoutWrapper(BasicLSTMCell(time_hidden_layer_size[i], forget_bias=1.0), output_keep_prob=.5))
 
     
-    timewise_lstm_stack = tf.keras.layers.StackedRNNCells(timewise_lstm_stack)    
+    #timewise_lstm_stack = tf.keras.layers.StackedRNNCells(timewise_lstm_stack)    
     #timewise_lstm_stack = tf.contrib.rnn.MultiRNNCell(timewise_lstm_stack)
     
     time_block_outputs = tf.keras.layers.RNN(timewise_lstm_stack, return_sequences=True)(time_block_inputs)      
     #time_block_outputs, time_block_state = tf.nn.dynamic_rnn(cell=timewise_lstm_stack, inputs=time_block_inputs, dtype=tf.float32)
-    
+
     return time_block_outputs
 
-def BiaxialNoteBlock(hidden_state, labels, note_hidden_layer_size, song_batch_size, song_timesteps):
+def BiaxialNoteBlock(hidden_state, y, note_hidden_layer_size, song_batch_size, song_timesteps):
 
-    num_notes = labels.get_shape().as_list()[1]
+    num_notes = tf.shape(hidden_state)[1]
     #hidden_state_size = tf.shape(labels)[3]
     
     """
@@ -75,17 +75,27 @@ def BiaxialNoteBlock(hidden_state, labels, note_hidden_layer_size, song_batch_si
     Outputs will be of dimension: (batch_size, timesteps, state_size)
     """
     
+    # Append Previous Note Played and Previous Note Articulated
+    y = tf.slice(y, [0, 0, 0, 0], [song_batch_size, song_timesteps, num_notes - 1, 2])
+
+    zeros = tf.zeros([song_batch_size, song_timesteps, 1, 2], dtype="float")
+        
+    labels = tf.concat([zeros, y], 2) 
+
+    labels = tf.reshape(labels, [song_batch_size * song_timesteps, num_notes, 2])    
+    
     note_block_inputs = tf.concat([hidden_state, labels], 2)
+    
     #note_block_inputs = tf.keras.Input((song_batch_size * song_timesteps, num_notes, hidden_state_size), tensor=note_block_inputs)    
     
     notewise_lstm_stack = []
 
     for i in range(2):
         
-        notewise_lstm_stack.append(tf.keras.layers.LSTMCell(note_hidden_layer_size[i], dropout=.5))
+        notewise_lstm_stack.append(tf.keras.layers.LSTMCell(note_hidden_layer_size[i]))
         #notewise_lstm_stack.append(DropoutWrapper(BasicLSTMCell(note_hidden_layer_size[i], forget_bias=1.0), output_keep_prob=.5))
       
-    notewise_lstm_stack = tf.keras.layers.StackedRNNCells(notewise_lstm_stack)    
+    #notewise_lstm_stack = tf.keras.layers.StackedRNNCells(notewise_lstm_stack)    
     #notewise_lstm_stack = tf.contrib.rnn.MultiRNNCell(notewise_lstm_stack)
     
     note_block_outputs = tf.keras.layers.RNN(notewise_lstm_stack, return_sequences=True)(note_block_inputs)    

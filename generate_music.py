@@ -33,9 +33,9 @@ def generatePieces(model_name, time_block_outputs, X, hidden_state, y, outputs, 
             # Run the time block by one tick, run entire recurrent sequence of note-axis layers, pass that final output into the next time step layer
             # (batch_size, timesteps, state_size)
             # where batch_size is each individual note for every song in the song batch (78 * song_batch_size)            
-            time_block_outputs_run = sess.run([time_block_outputs], feed_dict={X: current_timestep_input})
+            time_block_outputs_run, = sess.run([time_block_outputs], feed_dict={X: current_timestep_input})
             
-            hidden_state_size = tf.size(time_block_outputs_run)[2]            
+            hidden_state_size = time_block_outputs_run.get_shape().as_list()[2]            
             
             time_block_outputs_run = tf.reshape(time_block_outputs_run, [78, num_pieces, 1, hidden_state_size])            
             
@@ -112,12 +112,12 @@ def sampleFromOutputs(outputs):
     for i in range(batch_size):
         play = random.uniform()
         
-        if play <= outputs[i][0][0][0] * 0.5:
+        if play <= outputs[i][0][0][0]: #* 0.5:
             sample[i][0][0] = 1
         
         articulate = random.uniform()
         
-        if articulate <= outputs[i][0][0][1] * 0.5:
+        if articulate <= outputs[i][0][0][1]: #* 0.5:
             sample[i][0][1] = 1
 
 """

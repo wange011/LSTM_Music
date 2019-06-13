@@ -1,14 +1,13 @@
 import os, random
 import numpy as np
-import tensorflow as tf
+
 from data_formating import *
 
 def loadPianoPieces():
     working_directory = os.getcwd()
     music_directory = working_directory + "/training_sets/piano/"
 
-    midi_directories = ["albeniz"]
-    #, "beeth", "borodin", "brahms", "burgm", "chopin", "debussy", "granados", "grieg", "haydn", "liszt", "mendelssohn", "mozart", "muss", "schubert", "schumann", "tschai"]
+    midi_directories = ["albeniz", "beeth", "borodin", "brahms", "burgm", "chopin", "debussy", "granados", "grieg", "haydn", "liszt", "mendelssohn", "mozart", "muss", "schubert", "schumann", "tschai"]
     max_time_steps = 256 # only files at least this many 16th note steps are saved
     num_testing_pieces = 0
     
