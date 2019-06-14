@@ -5,7 +5,7 @@ import os
 
 import utility
 
-def train(model_name, training_set, time_block_outputs, X, hidden_state, y, loss, training_parameters):
+def train(model_name, training_set, time_block_outputs, X, hidden_state, y, loss, train_op, training_parameters):
     
     working_directory = os.getcwd()
     
@@ -36,7 +36,7 @@ def train(model_name, training_set, time_block_outputs, X, hidden_state, y, loss
             labels = batch[:, :, :, 53:]
 
           
-            loss_run, = sess.run([loss], feed_dict={X: inputs, hidden_state: np.zeros((batch_size * timesteps, 78, 300)), y: labels})                
+            loss_run, _, = sess.run([loss, train_op], feed_dict={X: inputs, hidden_state: np.zeros((batch_size * timesteps, 78, 300)), y: labels})                
             
             if step % display_step == 0:
     

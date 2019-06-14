@@ -68,7 +68,7 @@ display_step = 500
 # Training the model
 training_parameters = {"timesteps": timesteps, "batch_size": batch_size, "training_steps": epochs, "display_step": display_step}
 
-training.train(model_name, training_set, time_block_outputs, X, hidden_state, y, loss, training_parameters)
+training.train(model_name, training_set, time_block_outputs, X, hidden_state, y, loss, train_op, training_parameters)
 
 
 # Generating output samples
