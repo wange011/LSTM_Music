@@ -6,8 +6,8 @@ import tensorflow as tf
 def BiaxialTimeBlock(X, time_hidden_layer_size):
     
     # Input Dimensions: (song_batch_size, song_timesteps, 78, input_dim)
-    song_batch_size = X.get_shape().as_list()[0] 
-    song_timesteps = X.get_shape().as_list()[1] 
+    song_batch_size = tf.shape(X)[0] 
+    song_timesteps = tf.shape(X)[1] 
     input_dim = X.get_shape().as_list()[3] 
 
     """

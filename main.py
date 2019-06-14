@@ -27,40 +27,43 @@ training_set, testing_set = utility.loadPianoPieces()
 
 tf.reset_default_graph()
 
-timesteps = 16
-batch_size = 1
-epochs = 50000
-display_step = 500
 
-X = tf.placeholder("float", [batch_size, timesteps, 78, 53])
+X = tf.placeholder("float", [None, None, 78, 53])
 time_hidden_layer_size = [300, 300]
+
+batch_size = tf.shape(X)[0]
+timesteps = tf.shape(X)[1]
 
 time_block_outputs = model.BiaxialTimeBlock(X, time_hidden_layer_size)
 
 
-time_block_outputs = tf.reshape(time_block_outputs, [batch_size, 78, timesteps, time_block_outputs.get_shape().as_list()[2]])
-time_block_outputs = tf.transpose(time_block_outputs, perm=[2, 0, 1, 3])    
-time_block_outputs = tf.reshape(time_block_outputs, [batch_size * timesteps, 78, time_block_outputs.get_shape().as_list()[3]])    
+time_block_hidden = tf.reshape(time_block_outputs, [batch_size, 78, timesteps, time_block_outputs.get_shape().as_list()[2]])
+time_block_hidden = tf.transpose(time_block_hidden, perm=[2, 0, 1, 3])    
+time_block_hidden = tf.reshape(time_block_hidden, [batch_size * timesteps, 78, time_block_hidden.get_shape().as_list()[3]])    
         
 
-hidden_state = tf.placeholder("float", [batch_size * timesteps, None, 300])
-y = tf.placeholder("float", [batch_size, timesteps, None, 2])
+hidden_state = tf.placeholder("float", [None, None, 300])
+y = tf.placeholder("float", [None, None, None, 2])
 note_hidden_layer_size = [100, 50]
 
 
 generating_music = tf.Variable(initial_value=False, dtype="bool")
 
 
-time_block_outputs = tf.cond(tf.equal(generating_music, True), true_fn=lambda: hidden_state, false_fn=lambda: time_block_outputs)
+time_block_hidden = tf.cond(tf.equal(generating_music, True), true_fn=lambda: hidden_state, false_fn=lambda: time_block_hidden)
 
-outputs = model.BiaxialNoteBlock(time_block_outputs, y, note_hidden_layer_size, batch_size, timesteps)
+outputs = model.BiaxialNoteBlock(time_block_hidden, y, note_hidden_layer_size, batch_size, timesteps)
 
 loss = model.BiaxialLoss(outputs, y)
-optimizer = tf.train.AdamOptimizer()
+optimizer = tf.train.AdadeltaOptimizer()
 train_op = optimizer.minimize(loss)
 
 
 model_name = "BiaxialLSTM"
+timesteps = 16
+batch_size = 1
+epochs = 50000
+display_step = 500
 
 # Training the model
 training_parameters = {"timesteps": timesteps, "batch_size": batch_size, "training_steps": epochs, "display_step": display_step}
@@ -72,9 +75,11 @@ training.train(model_name, training_set, time_block_outputs, X, hidden_state, y,
 for i in range(1, int(epochs / (2 * display_step) + 1)):
 
     steps_trained = i * 2 * display_step   
+
+    print("Generating Pieces for " + model_name + "_" + str(steps_trained) + "_iterations")
     
-    output_parameters = {"steps_trained": steps_trained, "num_pieces": 5, "timesteps": 100}
-    pieces = generate_music.generatePieces(model_name, time_block_outputs, X, hidden_state, y, outputs, output_parameters)
+    output_parameters = {"steps_trained": steps_trained, "num_pieces": 1, "timesteps": 50, "display_step": display_step}
+    pieces = generate_music.generatePieces(model_name, time_block_outputs, X, hidden_state, generating_music, y, outputs, output_parameters)
     
     for j in range(len(pieces)):
-        utility.generateMIDI(pieces[j], model_name + "_" + steps_trained + "_iterations_" + str(j + 1))
+        utility.generateMIDI(pieces[j], model_name + "_" + str(steps_trained) + "_iterations_" + str(j + 1))
