@@ -38,7 +38,7 @@ def train(model_name, training_set, time_block_outputs, X, hidden_state, y, loss
           
             loss_run, = sess.run([loss], feed_dict={X: inputs, hidden_state: np.zeros((batch_size * timesteps, 78, 300)), y: labels})                
             
-            if step % display_step == 0 or step == 1:
+            if step % display_step == 0:
     
                 # To restore model during training: saver.restore(sess, "/tmp/model.ckpt")
                 

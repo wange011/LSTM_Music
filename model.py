@@ -115,7 +115,7 @@ def BiaxialNoteBlock(hidden_state, y, note_hidden_layer_size, song_batch_size, s
      # Convert the outputs of the note block to the input shape of the Dense layer
     note_block_outputs = tf.reshape(note_block_outputs, [song_batch_size, song_timesteps, num_notes, note_hidden_layer_size[-1]])
     
-    outputs = tf.keras.layers.Dense(2, activation=tf.keras.activations.sigmoid)(note_block_outputs)
+    outputs = tf.keras.layers.Dense(2)(note_block_outputs)
 
     return outputs
 
