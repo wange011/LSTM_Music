@@ -220,9 +220,9 @@ if __name__ == "__main__":
 
     model_name = "BiaxialLSTM"
     
-    output_parameters = {"steps_trained": 50000, "num_pieces": 5, "timesteps": 50, "display_step": 500}
+    output_parameters = {"steps_trained": 50000, "num_pieces": 1, "timesteps": 100, "display_step": 500}
     pieces = generatePieces(model_name, time_block_outputs, X, hidden_state, generating_music, y, outputs, output_parameters)
-    
+        
     for j in range(len(pieces)):
         utility.generateMIDI(pieces[j], model_name + "_" + str(50000) + "_iterations_" + str(j + 1))
     
