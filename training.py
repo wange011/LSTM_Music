@@ -4,8 +4,9 @@ import numpy as np
 import os 
 
 import utility
+import generate_music
 
-def train(model_name, training_set, time_block_outputs, X, hidden_state, y, loss, train_op, training_parameters):
+def train(model_name, training_set, time_block_outputs, X, hidden_state, generating_music, y, outputs, loss, train_op, training_parameters):
     
     working_directory = os.getcwd()
     
@@ -36,7 +37,7 @@ def train(model_name, training_set, time_block_outputs, X, hidden_state, y, loss
             labels = batch[:, :, :, 53:]
 
           
-            loss_run, _, = sess.run([loss, train_op], feed_dict={X: inputs, hidden_state: np.zeros((batch_size * timesteps, 78, 300)), y: labels})                
+            loss_run, outputs_run, _, = sess.run([loss, outputs, train_op], feed_dict={X: inputs, hidden_state: np.zeros((batch_size * timesteps, 78, 300)), y: labels})                
             
             if step % display_step == 0:
     
@@ -44,6 +45,12 @@ def train(model_name, training_set, time_block_outputs, X, hidden_state, y, loss
                 
                 # Saves the model            
                 saver.save(sess, working_directory + "/saved_models/" + model_name + "_" + str(step) + "_iterations.ckpt")            
+                
+                output_parameters = {"steps_trained": step, "num_pieces": 1, "timesteps": 50, "display_step": display_step}
+                pieces = generate_music.generatePieces(model_name, time_block_outputs, X, hidden_state, generating_music, y, outputs, output_parameters)
+        
+                for j in range(len(pieces)):
+                    utility.generateMIDI(pieces[j], model_name + "_" + str(50000) + "_iterations_" + str(j + 1))                
                 
                 # Calculate batch loss and accuracy
                 print("Step " + str(step) + ", Loss= " + str(loss_run))

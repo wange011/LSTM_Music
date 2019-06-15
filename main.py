@@ -5,7 +5,7 @@ import os
 import utility
 import model
 import training
-import generate_music
+#import generate_music
 
 working_directory = os.getcwd()
 
@@ -62,13 +62,13 @@ train_op = optimizer.minimize(loss)
 model_name = "BiaxialLSTM"
 timesteps = 16
 batch_size = 1
-epochs = 50000
+epochs = 20000
 display_step = 500
 
 # Training the model
 training_parameters = {"timesteps": timesteps, "batch_size": batch_size, "training_steps": epochs, "display_step": display_step}
 
-training.train(model_name, training_set, time_block_outputs, X, hidden_state, y, loss, train_op, training_parameters)
+training.train(model_name, training_set, time_block_outputs, X, hidden_state, generating_music, y, outputs, loss, train_op, training_parameters)
 
 """
 # Generating output samples
@@ -83,10 +83,11 @@ for i in range(1, int(epochs / (2 * display_step) + 1)):
     
     for j in range(len(pieces)):
         utility.generateMIDI(pieces[j], model_name + "_" + str(steps_trained) + "_iterations_" + str(j + 1))
-"""
+
 
 output_parameters = {"steps_trained": 50000, "num_pieces": 1, "timesteps": 100, "display_step": 500}
 pieces = generate_music.generatePieces(model_name, time_block_outputs, X, hidden_state, generating_music, y, outputs, output_parameters)
         
 for j in range(len(pieces)):
     utility.generateMIDI(pieces[j], model_name + "_" + str(50000) + "_iterations_" + str(j + 1))
+"""    
