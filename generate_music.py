@@ -112,6 +112,8 @@ def randomTimestep(batch_size):
 # Accounts for dropout (.5 during training) by multiplying output by .5
 def sampleFromOutputs(outputs):
 
+    print(outputs)
+
     batch_size = outputs.shape[0]
     
     sample = np.zeros((batch_size, 1, 1, 2))
