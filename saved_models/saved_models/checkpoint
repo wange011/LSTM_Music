@@ -1,0 +1,6 @@
+model_checkpoint_path: "/host/saved_models/BiaxialLSTM_50000_iterations.ckpt"
+all_model_checkpoint_paths: "/host/saved_models/BiaxialLSTM_48000_iterations.ckpt"
+all_model_checkpoint_paths: "/host/saved_models/BiaxialLSTM_48500_iterations.ckpt"
+all_model_checkpoint_paths: "/host/saved_models/BiaxialLSTM_49000_iterations.ckpt"
+all_model_checkpoint_paths: "/host/saved_models/BiaxialLSTM_49500_iterations.ckpt"
+all_model_checkpoint_paths: "/host/saved_models/BiaxialLSTM_50000_iterations.ckpt"
