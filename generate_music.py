@@ -177,45 +177,47 @@ def sampleTimestep(notes, articulation):
     articulation = tf.distributions.Bernoulli(logits=articulation).sample().eval()
     
     return np.vstack((notes, articulation)).T    
-   
+
+"""   
 
 if __name__ == "__main__":
     
     
-    batch_size = 5
-    timesteps = 1    
-    
-    #Generate music from a saved model
-    X = tf.placeholder("float", [batch_size, timesteps, 78, 53])
+    tf.reset_default_graph()
+
+
+    X = tf.placeholder("float", [None, None, 78, 53])
     time_hidden_layer_size = [300, 300]
-
+    
+    batch_size = tf.shape(X)[0]
+    timesteps = tf.shape(X)[1]
+    
     time_block_outputs = model.BiaxialTimeBlock(X, time_hidden_layer_size)
-
-
-    time_block_outputs = tf.reshape(time_block_outputs, [batch_size, 78, timesteps, time_block_outputs.get_shape().as_list()[2]])
-    time_block_outputs = tf.transpose(time_block_outputs, perm=[2, 0, 1, 3])    
-    time_block_outputs = tf.reshape(time_block_outputs, [batch_size * timesteps, 78, time_block_outputs.get_shape().as_list()[3]])    
-        
-
-    hidden_state = tf.placeholder("float", [batch_size * timesteps, None, 300])
-    y = tf.placeholder("float", [batch_size, timesteps, None, 2])
+    
+    
+    time_block_hidden = tf.reshape(time_block_outputs, [batch_size, 78, timesteps, time_block_outputs.get_shape().as_list()[2]])
+    time_block_hidden = tf.transpose(time_block_hidden, perm=[2, 0, 1, 3])    
+    time_block_hidden = tf.reshape(time_block_hidden, [batch_size * timesteps, 78, time_block_hidden.get_shape().as_list()[3]])    
+            
+    
+    hidden_state = tf.placeholder("float", [None, None, 300])
+    y = tf.placeholder("float", [None, None, None, 2])
     note_hidden_layer_size = [100, 50]
-
-
-    generating_music = tf.Variable(initial_value=True, dtype="bool")
-
-
-    time_block_outputs = tf.cond(tf.equal(generating_music, True), true_fn=lambda: hidden_state, false_fn=lambda: time_block_outputs)
-
-    outputs = model.BiaxialNoteBlock(time_block_outputs, y, note_hidden_layer_size, batch_size, timesteps)
-
+    
+    
+    generating_music = tf.Variable(initial_value=False, dtype="bool")
+    
+    
+    time_block_hidden = tf.cond(tf.equal(generating_music, True), true_fn=lambda: hidden_state, false_fn=lambda: time_block_hidden)
+    
+    outputs = model.BiaxialNoteBlock(time_block_hidden, y, note_hidden_layer_size, batch_size, timesteps)
+    
     loss = model.BiaxialLoss(outputs, y)
-    optimizer = tf.train.AdamOptimizer()
+    optimizer = tf.train.AdadeltaOptimizer()
     train_op = optimizer.minimize(loss)
 
 
     model_name = "BiaxialLSTM"
     
-    output_parameters = {"steps_trained": 48000, "num_pieces": 5, "timesteps": timesteps}
+    output_parameters = {"steps_trained": 50000, "num_pieces": 5, "timesteps": timesteps, "display_step": 500}
     pieces = generatePieces(model_name, time_block_outputs, X, hidden_state, generating_music, y, outputs, output_parameters)    
-"""
