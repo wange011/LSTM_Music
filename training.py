@@ -50,7 +50,7 @@ def train(model_name, training_set, time_block_outputs, X, hidden_state, generat
                 pieces = generate_music.generatePieces(model_name, time_block_outputs, X, hidden_state, generating_music, y, outputs, output_parameters)
         
                 for j in range(len(pieces)):
-                    utility.generateMIDI(pieces[j], model_name + "_" + str(50000) + "_iterations_" + str(j + 1))                
+                    utility.generateMIDI(pieces[j], model_name + "_" + str(step) + "_iterations_" + str(j + 1))                
                 
                 # Calculate batch loss and accuracy
                 print("Step " + str(step) + ", Loss= " + str(loss_run))
