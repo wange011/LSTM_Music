@@ -112,9 +112,11 @@ def randomTimestep(batch_size):
 # Accounts for dropout (.5 during training) by multiplying output by .5
 def sampleFromOutputs(outputs):
 
-    print(outputs)
-
     batch_size = outputs.shape[0]
+    
+    for i in range(batch_size):
+        outputs[i][0][0][0] = sigmoid(outputs[i][0][0][0])
+        outputs[i][0][0][1] = sigmoid(outputs[i][0][0][1])
     
     sample = np.zeros((batch_size, 1, 1, 2))
     
@@ -130,6 +132,12 @@ def sampleFromOutputs(outputs):
             sample[i][0][0][1] = 1
 
     return sample
+    
+def sigmoid(x, derivative=False):
+    sigm = 1. / (1. + np.exp(-x))
+    if derivative:
+        return sigm * (1. - sigm)
+    return sigm    
 """
 def generatePiece(input_dim = 2 * 78):
 
