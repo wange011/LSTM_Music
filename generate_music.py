@@ -122,7 +122,8 @@ def sampleFromOutputs(outputs):
     
     for i in range(batch_size):
         play = random.uniform(0, 1)
-        
+       
+        """
         if play <= outputs[i][0][0][0]: #* 0.5:
             sample[i][0][0][0] = 1
         
@@ -131,7 +132,7 @@ def sampleFromOutputs(outputs):
             if articulate <= outputs[i][0][0][1]: #* 0.5:
                 sample[i][0][0][1] = 1
 
-        """"
+        """
         if 0.5 <= outputs[i][0][0][0]: #* 0.5:
             sample[i][0][0][0] = 1
         
@@ -139,7 +140,7 @@ def sampleFromOutputs(outputs):
         
             if 0.5 <= outputs[i][0][0][1]: #* 0.5:
                 sample[i][0][0][1] = 1
-        """
+        
     
     return sample
     
@@ -246,5 +247,5 @@ if __name__ == "__main__":
     print(pieces)    
     
     for j in range(len(pieces)):
-        utility.generateMIDI(pieces[j], model_name + "_" + str(50000) + "_iterations_" + str(j + 1))
+        utility.generateMIDI(pieces[j], model_name + "_" + str(50000) + "_iterations_test_" + str(j + 1))
     
