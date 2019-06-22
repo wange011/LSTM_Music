@@ -130,6 +130,8 @@ def BiaxialLoss(outputs, labels):
 
     loss = tf.nn.sigmoid_cross_entropy_with_logits(labels=labels, logits=outputs)
 
+    loss = tf.reduce_mean(loss)    
+    
     return loss
 
 """

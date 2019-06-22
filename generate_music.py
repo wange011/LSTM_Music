@@ -126,11 +126,21 @@ def sampleFromOutputs(outputs):
         if play <= outputs[i][0][0][0]: #* 0.5:
             sample[i][0][0][0] = 1
         
-        articulate = random.uniform(0, 1)
+            articulate = random.uniform(0, 1)
         
-        if articulate <= outputs[i][0][0][1]: #* 0.5:
-            sample[i][0][0][1] = 1
+            if articulate <= outputs[i][0][0][1]: #* 0.5:
+                sample[i][0][0][1] = 1
 
+        """"
+        if 0.5 <= outputs[i][0][0][0]: #* 0.5:
+            sample[i][0][0][0] = 1
+        
+            articulate = random.uniform(0, 1)
+        
+            if 0.5 <= outputs[i][0][0][1]: #* 0.5:
+                sample[i][0][0][1] = 1
+        """
+    
     return sample
     
 def sigmoid(x, derivative=False):
