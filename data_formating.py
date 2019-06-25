@@ -173,19 +173,24 @@ Output should have shape (timesteps, num_notes, 1 + 12 + 24 + 12 + 4 + 2 = 55)
 """    
 def noteStateToBiaxialInput(statematrix, timestep_num = 0):
     
-    biaxial_input = np.zeros((len(statematrix), 78, 55))   
+    biaxial_input = []   
     
+    """
     beat = [[0, 0, 0, 0], [1, 0, 0, 0], [0, 1, 0, 0], [1, 1, 0, 0],
             [0, 0, 1, 0], [1, 0, 1, 0], [0, 1, 1, 0], [1, 1, 1, 0],
             [0, 0, 0, 1], [1, 0, 0, 1], [0, 1, 0, 1], [1, 1, 0, 1],
-            [0, 0, 1, 1], [1, 0, 1, 1], [0, 1, 1, 1], [1, 1, 1, 1]]  
+            [0, 0, 1, 1], [1, 0, 1, 1], [0, 1, 1, 1], [1, 1, 1, 1]]
+    """        
     
     for timestep in range(len(statematrix)):
-         
+
+        timestep_matrix = []        
+        
         for note in range(len(statematrix[0])):
              
             note_matrix = []
-             
+            
+            """    
             note_matrix.append(note)
             note_matrix.extend([1 if x == note % 12 else 0 for x in range(12)])
             
@@ -212,9 +217,23 @@ def noteStateToBiaxialInput(statematrix, timestep_num = 0):
                          
             note_matrix.extend(prev_context)
             note_matrix.extend(beat[(timestep + timestep_num) % 16])
+            """
+            
+            prev_context = [0 for x in range(12)]
+            if (timestep != 0):
+                
+                for i in range(len(statematrix[timestep - 1])):                
+                    
+                    if statematrix[timestep - 1][i][0] == 1:
+                        prev_context[i % 12] = prev_context[i % 12] + 1
+                         
+            note_matrix.extend(prev_context)
+            
             note_matrix.append(statematrix[timestep][note][0])            
             note_matrix.append(statematrix[timestep][note][0])            
             
-            biaxial_input[timestep][note] = np.array(note_matrix)
+            timestep_matrix.append(note_matrix)
 
-    return biaxial_input            
+        biaxial_input.append(timestep_matrix)        
+        
+    return np.array(biaxial_input)            

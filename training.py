@@ -26,15 +26,22 @@ def train(model_name, training_set, time_block_outputs, X, hidden_state, generat
         print("Starting Training")
         sess.run(init)
 
+        training_set = utility.generateBatches(training_set, batch_size, timesteps)
+
+        num_batches = training_set.shape[0]
+
         for step in range(1, training_steps + 1):
             
             
             # Get batch of shape [batch_size, timesteps, 78, 55]
             # Corresponds with values for (batch, timestep, note_played, articulation)
-            batch = utility.getPieceBatch(training_set, batch_size, timesteps)[1]
+            if step % num_batches == 1 and step != 1:
+                training_set = utility.shuffleBatches(training_set)
             
-            inputs = batch[:, :, :, :53]
-            labels = batch[:, :, :, 53:]
+            batch = training_set[(step - 1) % num_batches]
+            
+            inputs = batch[:, :, :, :12]
+            labels = batch[:, :, :, 12:]
 
           
             loss_run, outputs_run, _, = sess.run([loss, outputs, train_op], feed_dict={X: inputs, hidden_state: np.zeros((batch_size * timesteps, 78, 300)), y: labels})                
@@ -53,6 +60,14 @@ def train(model_name, training_set, time_block_outputs, X, hidden_state, generat
                 for j in range(len(pieces)):
                     utility.generateMIDI(pieces[j], model_name + "_" + str(step) + "_iterations_" + str(j + 1))                
                 """    
+                
+                for i in range(timesteps):
+                    for j in range(78):
+                        outputs_run[0][i][j][0] = generate_music.sigmoid(outputs_run[0][i][j][0])
+                        outputs_run[0][i][j][1] = generate_music.sigmoid(outputs_run[0][i][j][1])
+                
+                print(labels[0][3])
+                print(outputs_run[0][3])                
                 
                 # Calculate batch loss and accuracy
                 print("Step " + str(step) + ", Loss= " + str(loss_run))

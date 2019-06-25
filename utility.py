@@ -56,19 +56,44 @@ def loadPieces(dirpath, max_time_steps):
 
 division_len = 16
 
-def getPieceSegment(pieces, num_time_steps):
-    piece_output = random.choice(list(pieces.values()))
-    start = random.randrange(0,len(piece_output)-num_time_steps,division_len)
-    # print "Range is {} {} {} -> {}".format(0,len(piece_output)-num_time_steps,division_len, start)
+def generateBatches(training_set, batch_size, timesteps):
 
-    seg_out = piece_output[start:start+num_time_steps]
-    seg_in = noteStateMatrixToInputForm(seg_out)
+    batches = []    
+    batch = []
+    
+    for key in training_set.keys():
 
-    return seg_in, seg_out
+        piece = training_set[key]        
+        
+        current_timestep = timesteps
+        prev_timestep = 0        
+        
+        while current_timestep <= piece.shape[0]:
+            
+            batch.append(piece[prev_timestep:current_timestep, :, :])
 
-def getPieceBatch(pieces, batch_size, num_time_steps):
-    i,o = zip(*[getPieceSegment(pieces, num_time_steps) for _ in range(batch_size)])
-    return np.array(i), np.array(o)
+            if len(batch) >= batch_size:
+                batches.append(batch)
+                batch = []
+            
+            prev_timestep = current_timestep
+            current_timestep += timesteps
+        
+    if len(batch) != 0:
+        
+        while len(batch) < batch_size:
+            
+            batch_num = random.randint(0, len(batches) - 1)
+            sample_num = random.randint(0, batch_size - 1)
+            batch.append(batches[batch_num][sample_num])            
+            
+        batches.append(batch)
+
+    return np.array(batches)
+
+def shuffleBatches(training_set):
+    np.random.shuffle(training_set)
+    return training_set
 
 def generateMIDI(piece, name):
     working_directory = os.getcwd()

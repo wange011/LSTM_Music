@@ -1,7 +1,7 @@
 import tensorflow as tf
 
 import os 
-
+import numpy as np
 import utility
 import model
 import training
@@ -9,7 +9,7 @@ import training
 
 working_directory = os.getcwd()
 
-# MIDI files are converted to Note State
+# MIDI files are first converted to Note State
 
 """
 Note State:
@@ -23,12 +23,12 @@ Dimension 3: Articulation (1 denotes the note was played at the given timestep),
 # Gather the training pieces from the specified directories
 # Saved with dimensions (timesteps, notes_played, articulation)
 training_set, testing_set = utility.loadPianoPieces()
-
+print(training_set['alb_esp2'][0])   
 
 tf.reset_default_graph()
 
 
-X = tf.placeholder("float", [None, None, 78, 53])
+X = tf.placeholder("float", [None, None, 78, 12])
 time_hidden_layer_size = [300, 300]
 
 batch_size = tf.shape(X)[0]
@@ -62,17 +62,17 @@ train_op = optimizer.minimize(loss)
 model_name = "BiaxialLSTM"
 timesteps = 16
 batch_size = 1
-epochs = 200
+steps = 200
 display_step = 1
 
 # Training the model
-training_parameters = {"timesteps": timesteps, "batch_size": batch_size, "training_steps": epochs, "display_step": display_step}
+training_parameters = {"timesteps": timesteps, "batch_size": batch_size, "training_steps": steps, "display_step": display_step}
 
 training.train(model_name, training_set, time_block_outputs, X, hidden_state, generating_music, y, outputs, loss, train_op, training_parameters)
 
 """
 # Generating output samples
-for i in range(1, int(epochs / (2 * display_step) + 1)):
+for i in range(1, int(steps / (2 * display_step) + 1)):
 
     steps_trained = i * 2 * display_step   
 

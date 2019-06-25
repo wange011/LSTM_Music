@@ -32,7 +32,7 @@ def BiaxialTimeBlock(X, time_hidden_layer_size):
     # Reshaping the inputs
     time_block_inputs = tf.transpose(X, perm=[0, 2, 1, 3])
     time_block_inputs = tf.reshape(time_block_inputs, [song_batch_size * 78, song_timesteps, input_dim])
-
+    
     #time_block_inputs = tf.keras.Input((song_batch_size * 78, song_timesteps, input_dim), tensor=time_block_inputs)    
     
     timewise_lstm_stack = []
@@ -70,7 +70,7 @@ def BiaxialNoteBlock(hidden_state, y, note_hidden_layer_size, song_batch_size, s
 
     Reshape inputs to be: (batch_size, timesteps, h + 2)
     where batch_size is each timestep for each song in the song batch    
-    and timesteps corresponds to each individual note at a particular timestep in the song (78) 
+    and timesteps corresponds to each individual note at a particular timestep in the song (78 during training) 
 
     Outputs will be of dimension: (batch_size, timesteps, state_size)
     """
