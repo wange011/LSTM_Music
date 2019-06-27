@@ -84,12 +84,12 @@ def generateInputFromPreviousTimestep(pieces):
 
     pieces = np.concatenate((pieces, np.zeros((num_pieces, 1, 78, 2))), axis=1)
 
-    biaxial_inputs = data_formating.noteStateToBiaxialInput(pieces[0], timestep_num)[1, :, :53]
-    biaxial_inputs = np.reshape(biaxial_inputs, [1, 1, 78, 53])    
+    biaxial_inputs = data_formating.noteStateToBiaxialInput(pieces[0], timestep_num)[1, :, :12]
+    biaxial_inputs = np.reshape(biaxial_inputs, [1, 1, 78, 12])    
     
     for i in range(1, num_pieces):    
-        next_input = data_formating.noteStateToBiaxialInput(pieces[i], timestep_num)[1, :, :53]
-        next_input = np.reshape(next_input, [1, 1, 78, 53])  
+        next_input = data_formating.noteStateToBiaxialInput(pieces[i], timestep_num)[1, :, :12]
+        next_input = np.reshape(next_input, [1, 1, 78, 12])  
         biaxial_inputs = np.concatenate((biaxial_inputs, next_input), axis=0)        
 
     return biaxial_inputs    
