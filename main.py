@@ -22,8 +22,7 @@ Dimension 3: Articulation (1 denotes the note was played at the given timestep),
 
 # Gather the training pieces from the specified directories
 # Saved with dimensions (timesteps, notes_played, articulation)
-training_set, testing_set = utility.loadPianoPieces()
-print(training_set['alb_esp2'][3])   
+training_set, testing_set = utility.loadPianoPieces()   
 
 tf.reset_default_graph()
 
@@ -63,7 +62,7 @@ model_name = "BiaxialLSTM"
 timesteps = 16
 batch_size = 5
 steps = 50000
-display_step = 500
+display_step = 1000
 
 # Training the model
 training_parameters = {"timesteps": timesteps, "batch_size": batch_size, "training_steps": steps, "display_step": display_step}
