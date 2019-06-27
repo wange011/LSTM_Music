@@ -57,7 +57,7 @@ def generatePieces(model_name, time_block_outputs, X, hidden_state, generating_m
                 hidden_state_run = np.reshape(hidden_state_run, (num_pieces, i + 1, hidden_state_size))          
             
                 outputs_run, = sess.run([outputs], feed_dict={X: current_timestep_input, hidden_state: hidden_state_run, y: labels})
-                
+                                
                 # Outputs in shape (song_batch_size, song_timesteps = 1, num_notes = 1, 2)
                 # Samples from solely last input of the num_notes dimension
                 note_step = sampleFromOutputs(outputs_run)
@@ -100,7 +100,7 @@ def randomTimestep(batch_size):
     timestep = np.zeros((batch_size, 1, 78, 2))        
 
     for i in range(batch_size):
-        rand_note = random.randint(0, 78)
+        rand_note = random.randint(0, 77)
         timestep[i][0][rand_note][0] = 1
         timestep[i][0][rand_note][1] = 1
 
@@ -113,10 +113,16 @@ def randomTimestep(batch_size):
 def sampleFromOutputs(outputs):
 
     batch_size = outputs.shape[0]
-    
+    note_num = outputs.shape[2] - 1    
+
     for i in range(batch_size):
-        outputs[i][0][0][0] = sigmoid(outputs[i][0][0][0])
-        outputs[i][0][0][1] = sigmoid(outputs[i][0][0][1])
+        outputs[i][0][note_num][0] = sigmoid(outputs[i][0][note_num][0])
+        if outputs[i][0][note_num][0] > .2:
+            print(outputs[i][0][note_num][0])
+        outputs[i][0][note_num][1] = sigmoid(outputs[i][0][note_num][1])
+
+    if note_num == 77:
+        print("Finished Timestep")
     
     sample = np.zeros((batch_size, 1, 1, 2))
     
@@ -124,21 +130,21 @@ def sampleFromOutputs(outputs):
         play = random.uniform(0, 1)
        
         
-        if play <= outputs[i][0][0][0]: #* 0.5:
+        if play <= outputs[i][0][note_num][0]: #* 0.5:
             sample[i][0][0][0] = 1
         
             articulate = random.uniform(0, 1)
         
-            if articulate <= outputs[i][0][0][1]: #* 0.5:
+            if articulate <= outputs[i][0][note_num][1]: #* 0.5:
                 sample[i][0][0][1] = 1
 
         """
-        if 0.5 <= outputs[i][0][0][0]: #* 0.5:
+        if 0.5 <= outputs[i][0][note_num][0]: #* 0.5:
             sample[i][0][0][0] = 1
         
             articulate = random.uniform(0, 1)
         
-            if 0.5 <= outputs[i][0][0][1]: #* 0.5:
+            if 0.5 <= outputs[i][0][note_num][1]: #* 0.5:
                 sample[i][0][0][1] = 1
         """
     
@@ -208,7 +214,7 @@ if __name__ == "__main__":
     tf.reset_default_graph()
 
 
-    X = tf.placeholder("float", [None, None, 78, 53])
+    X = tf.placeholder("float", [None, None, 78, 12])
     time_hidden_layer_size = [300, 300]
     
     batch_size = tf.shape(X)[0]
@@ -235,17 +241,16 @@ if __name__ == "__main__":
     outputs = model.BiaxialNoteBlock(time_block_hidden, y, note_hidden_layer_size, batch_size, timesteps)
     
     loss = model.BiaxialLoss(outputs, y)
-    optimizer = tf.train.AdadeltaOptimizer()
+    optimizer = tf.train.AdamOptimizer()
     train_op = optimizer.minimize(loss)
 
 
     model_name = "BiaxialLSTM"
     
-    output_parameters = {"steps_trained": 50000, "num_pieces": 1, "timesteps": 100, "display_step": 500}
-    pieces = generatePieces(model_name, time_block_outputs, X, hidden_state, generating_music, y, outputs, output_parameters)
-    
-    print(pieces)    
+    output_parameters = {"steps_trained": 50000, "num_pieces": 5, "timesteps": 100, "display_step": 500}
+    pieces = generatePieces(model_name, time_block_outputs, X, hidden_state, generating_music, y, outputs, output_parameters)        
     
     for j in range(len(pieces)):
+        print(np.count_nonzero(pieces[j]))
         utility.generateMIDI(pieces[j], model_name + "_" + str(50000) + "_iterations_test_" + str(j + 1))
     
