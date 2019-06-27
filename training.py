@@ -50,7 +50,7 @@ def train(model_name, training_set, time_block_outputs, X, hidden_state, generat
     
                 # To restore model during training: saver.restore(sess, "/tmp/model.ckpt")
                 
-                """
+                
                 # Saves the model            
                 saver.save(sess, working_directory + "/saved_models/" + model_name + "_" + str(step) + "_iterations.ckpt")            
                 
@@ -59,7 +59,7 @@ def train(model_name, training_set, time_block_outputs, X, hidden_state, generat
         
                 for j in range(len(pieces)):
                     utility.generateMIDI(pieces[j], model_name + "_" + str(step) + "_iterations_" + str(j + 1))                
-                """    
+                    
                 
                 for i in range(timesteps):
                     for j in range(78):

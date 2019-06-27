@@ -225,7 +225,7 @@ def noteStateToBiaxialInput(statematrix, timestep_num = 0):
                 for i in range(len(statematrix[timestep - 1])):                
                     
                     if statematrix[timestep - 1][i][0] == 1:
-                        prev_context[i % 12] = prev_context[i % 12] + 1
+                        prev_context[(note - i) % 12] = prev_context[(note - i) % 12] + 1
                          
             note_matrix.extend(prev_context)
             

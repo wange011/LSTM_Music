@@ -23,7 +23,7 @@ Dimension 3: Articulation (1 denotes the note was played at the given timestep),
 # Gather the training pieces from the specified directories
 # Saved with dimensions (timesteps, notes_played, articulation)
 training_set, testing_set = utility.loadPianoPieces()
-print(training_set['alb_esp2'][0])   
+print(training_set['alb_esp2'][3])   
 
 tf.reset_default_graph()
 
@@ -55,15 +55,15 @@ time_block_hidden = tf.cond(tf.equal(generating_music, True), true_fn=lambda: hi
 outputs = model.BiaxialNoteBlock(time_block_hidden, y, note_hidden_layer_size, batch_size, timesteps)
 
 loss = model.BiaxialLoss(outputs, y)
-optimizer = tf.train.AdadeltaOptimizer()
+optimizer = tf.train.AdamOptimizer()
 train_op = optimizer.minimize(loss)
 
 
 model_name = "BiaxialLSTM"
 timesteps = 16
-batch_size = 1
-steps = 200
-display_step = 1
+batch_size = 5
+steps = 10000
+display_step = 500
 
 # Training the model
 training_parameters = {"timesteps": timesteps, "batch_size": batch_size, "training_steps": steps, "display_step": display_step}
