@@ -62,7 +62,7 @@ train_op = optimizer.minimize(loss)
 model_name = "BiaxialLSTM"
 timesteps = 16
 batch_size = 5
-steps = 10000
+steps = 50000
 display_step = 500
 
 # Training the model

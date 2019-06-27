@@ -54,7 +54,7 @@ def train(model_name, training_set, time_block_outputs, X, hidden_state, generat
                 # Saves the model            
                 saver.save(sess, working_directory + "/saved_models/" + model_name + "_" + str(step) + "_iterations.ckpt")            
                 
-                output_parameters = {"steps_trained": step, "num_pieces": 1, "timesteps": 50, "display_step": display_step}
+                output_parameters = {"steps_trained": step, "num_pieces": 2, "timesteps": 150, "display_step": display_step}
                 pieces = generate_music.generatePieces(model_name, time_block_outputs, X, hidden_state, generating_music, y, outputs, output_parameters)
         
                 for j in range(len(pieces)):
