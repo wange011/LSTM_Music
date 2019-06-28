@@ -175,12 +175,10 @@ def noteStateToBiaxialInput(statematrix, timestep_num = 0):
     
     biaxial_input = []   
     
-    """
     beat = [[0, 0, 0, 0], [1, 0, 0, 0], [0, 1, 0, 0], [1, 1, 0, 0],
             [0, 0, 1, 0], [1, 0, 1, 0], [0, 1, 1, 0], [1, 1, 1, 0],
             [0, 0, 0, 1], [1, 0, 0, 1], [0, 1, 0, 1], [1, 1, 0, 1],
-            [0, 0, 1, 1], [1, 0, 1, 1], [0, 1, 1, 1], [1, 1, 1, 1]]
-    """        
+            [0, 0, 1, 1], [1, 0, 1, 1], [0, 1, 1, 1], [1, 1, 1, 1]]       
     
     for timestep in range(len(statematrix)):
 
@@ -190,7 +188,6 @@ def noteStateToBiaxialInput(statematrix, timestep_num = 0):
              
             note_matrix = []
             
-            """    
             note_matrix.append(note)
             note_matrix.extend([1 if x == note % 12 else 0 for x in range(12)])
             
@@ -217,17 +214,6 @@ def noteStateToBiaxialInput(statematrix, timestep_num = 0):
                          
             note_matrix.extend(prev_context)
             note_matrix.extend(beat[(timestep + timestep_num) % 16])
-            """
-            
-            prev_context = [0 for x in range(12)]
-            if (timestep != 0):
-                
-                for i in range(len(statematrix[timestep - 1])):                
-                    
-                    if statematrix[timestep - 1][i][0] == 1:
-                        prev_context[(note - i) % 12] = prev_context[(note - i) % 12] + 1
-                         
-            note_matrix.extend(prev_context)
             
             note_matrix.append(statematrix[timestep][note][0])            
             note_matrix.append(statematrix[timestep][note][0])            

@@ -27,7 +27,7 @@ training_set, testing_set = utility.loadPianoPieces()
 tf.reset_default_graph()
 
 
-X = tf.placeholder("float", [None, None, 78, 12])
+X = tf.placeholder("float", [None, None, 78, 53])
 time_hidden_layer_size = [300, 300]
 
 batch_size = tf.shape(X)[0]
@@ -59,7 +59,7 @@ train_op = optimizer.minimize(loss)
 
 
 model_name = "BiaxialLSTM"
-timesteps = 16
+timesteps = 128
 batch_size = 5
 steps = 50000
 display_step = 1000

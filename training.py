@@ -40,8 +40,8 @@ def train(model_name, training_set, time_block_outputs, X, hidden_state, generat
             
             batch = training_set[(step - 1) % num_batches]
             
-            inputs = batch[:, :, :, :12]
-            labels = batch[:, :, :, 12:]
+            inputs = batch[:, :, :, :53]
+            labels = batch[:, :, :, 53:]
 
           
             loss_run, outputs_run, _, = sess.run([loss, outputs, train_op], feed_dict={X: inputs, hidden_state: np.zeros((batch_size * timesteps, 78, 300)), y: labels})                
