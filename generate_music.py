@@ -130,21 +130,13 @@ def sampleFromOutputs(outputs):
         
         play = random.uniform(0, 1)
         
-        if play * 1.5 <= outputs[i][0][note_num][0]: #* 0.5:
+        if play * 2 <= outputs[i][0][note_num][0]: #* 0.5:
             sample[i][0][0][0] = 1
         
             articulate = random.uniform(0, 1)
         
-            if articulate * 1.5 <= outputs[i][0][note_num][1]: #* 0.5:
-                sample[i][0][0][1] = 1
-
-        """
-        if 0.3 <= outputs[i][0][note_num][0]: #* 0.5:
-            sample[i][0][0][0] = 1
-        
-            if 0.3 <= outputs[i][0][note_num][1]: #* 0.5:
-                sample[i][0][0][1] = 1
-        """        
+            if articulate * 2 <= outputs[i][0][note_num][1]: #* 0.5:
+                sample[i][0][0][1] = 1                
     
     return sample
     
