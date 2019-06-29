@@ -117,12 +117,8 @@ def sampleFromOutputs(outputs):
 
     for i in range(batch_size):
         outputs[i][0][note_num][0] = sigmoid(outputs[i][0][note_num][0])
-        if outputs[i][0][note_num][0] > .3:
-            print(outputs[i][0][note_num][0])
+        
         outputs[i][0][note_num][1] = sigmoid(outputs[i][0][note_num][1])
-
-    if note_num == 77:
-        print("Finished Timestep")
     
     sample = np.zeros((batch_size, 1, 1, 2))
     
@@ -130,12 +126,12 @@ def sampleFromOutputs(outputs):
         
         play = random.uniform(0, 1)
         
-        if play * 2 <= outputs[i][0][note_num][0]: #* 0.5:
+        if play * 2 <= outputs[i][0][note_num][0] and outputs[i][0][note_num][0] > .2: #* 0.5:
             sample[i][0][0][0] = 1
         
             articulate = random.uniform(0, 1)
         
-            if articulate * 2 <= outputs[i][0][note_num][1]: #* 0.5:
+            if articulate * 2 <= outputs[i][0][note_num][1] and outputs[i][0][note_num][1] > .2: #* 0.5:
                 sample[i][0][0][1] = 1                
     
     return sample
@@ -237,7 +233,7 @@ if __name__ == "__main__":
 
     model_name = "BiaxialLSTM"
     
-    output_parameters = {"steps_trained": 50000, "num_pieces": 5, "timesteps": 100, "display_step": 500}
+    output_parameters = {"steps_trained": 50000, "num_pieces": 5, "timesteps": 1600, "display_step": 1000}
     pieces = generatePieces(model_name, time_block_outputs, X, hidden_state, generating_music, y, outputs, output_parameters)        
     
     for j in range(len(pieces)):
