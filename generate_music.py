@@ -100,7 +100,7 @@ def randomTimestep(batch_size):
     timestep = np.zeros((batch_size, 1, 78, 2))        
 
     for i in range(batch_size):
-        rand_note = random.randint(0, 77)
+        rand_note = random.randint(20, 60)
         timestep[i][0][rand_note][0] = 1
         timestep[i][0][rand_note][1] = 1
 
