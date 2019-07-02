@@ -84,6 +84,7 @@ def BiaxialNoteBlock(hidden_state, y, note_hidden_layer_size, song_batch_size, s
 
     labels = tf.reshape(labels, [song_batch_size * song_timesteps, num_notes, 2])    
     
+    # Append time_block_output with previous_note_played and previous_note_articulated
     note_block_inputs = tf.concat([hidden_state, labels], 2)
     
     #note_block_inputs = tf.keras.Input((song_batch_size * song_timesteps, num_notes, hidden_state_size), tensor=note_block_inputs)    
@@ -125,7 +126,7 @@ def BiaxialLoss(outputs, labels):
     
     Measures the probability error in discrete classification tasks in which each class is independent and not mutually exclusive
 
-    We have 2 independent classes: (note_played, note_articulation), so we use sigmoid cross entropy    
+    We have 2 independent classes for each note: (note_played, note_articulation), so we use sigmoid cross entropy    
     """
 
     loss = tf.nn.sigmoid_cross_entropy_with_logits(labels=labels, logits=outputs)

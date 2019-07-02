@@ -27,16 +27,16 @@ def train(model_name, training_set, time_block_outputs, X, hidden_state, generat
         
         file.write("Starting Training")
         sess.run(init)
-
+        
+        # Generate mini-batches
+        # Get batch of shape [batch_size, timesteps, 78, 55]
         training_set = utility.generateBatches(training_set, batch_size, timesteps)
 
         num_batches = training_set.shape[0]
 
         for step in range(1, training_steps + 1):
             
-            
-            # Get batch of shape [batch_size, timesteps, 78, 55]
-            # Corresponds with values for (batch, timestep, note_played, articulation)
+            # Shuffle the training set between each epoch
             if step % num_batches == 1 and step != 1:
                 training_set = utility.shuffleBatches(training_set)
             
@@ -45,17 +45,16 @@ def train(model_name, training_set, time_block_outputs, X, hidden_state, generat
             inputs = batch[:, :, :, :53]
             labels = batch[:, :, :, 53:]
 
-          
+            # Evaluate the computational graph
             loss_run, outputs_run, _, = sess.run([loss, outputs, train_op], feed_dict={X: inputs, hidden_state: np.zeros((batch_size * timesteps, 78, 300)), y: labels})                
             
+            # Each display_step iterations, save the model and generate outputs
             if step % display_step == 0:
-    
-                # To restore model during training: saver.restore(sess, "/tmp/model.ckpt")
-                
                 
                 # Saves the model            
                 saver.save(sess, working_directory + "/saved_models/" + model_name + "_" + str(step) + "_iterations.ckpt")            
                 
+                # Generates outputs
                 output_parameters = {"steps_trained": step, "num_pieces": 2, "timesteps": 150, "display_step": display_step}
                 pieces = generate_music.generatePieces(model_name, time_block_outputs, X, hidden_state, generating_music, y, outputs, output_parameters)
         
@@ -70,10 +69,10 @@ def train(model_name, training_set, time_block_outputs, X, hidden_state, generat
                 
                 print(labels[0][3])
                 file.write("Labels:")
-                file.write(labels[0][3])
+                np.savetxt("training_progress.txt", labels[0][3], newline="")
                 print(outputs_run[0][3])
                 file.write("Outputs:")
-                file.write(outputs[0][3])                
+                np.savetxt("training_progress.txt", outputs_run[0][3], newline="")
                 
                 # Calculate batch loss and accuracy
                 print("Step " + str(step) + ", Loss= " + str(loss_run))

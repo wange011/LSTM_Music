@@ -157,15 +157,20 @@ def noteStateMatrixToInputForm(statematrix):
     return inputform    
 
 """
-Returns the Note State Matrix with the following dimensions:
+Returns an array with the following features for each note at each timestep in the piece:
 
-Position [Size 1]:
-Pitchclass [12]:
-Previous Vicinity [24]:
-Previous Context [12]:
-Beat [4]:
+Position [Size 1]: MIDI value for the note
 
-Labels:
+Pitchclass [12]: Class of the note (ex: C#)
+
+Previous Vicinity [24]: Gives context for the surrounding notes, 2(i) is 1 if the note at offset i was played last timestep,
+2(i) + 1 is 1 if the note at offset i was articulated last timestep
+
+Previous Context [12]: Value at index i will be the number of times the note at offset i was played last timestep
+
+Beat [4]: Representation of each measure (gives the specific timestep within each measure) 
+
+Labels (Binary values):
 Played
 Articulated
 
