@@ -117,7 +117,9 @@ def sampleFromOutputs(outputs):
 
     for i in range(batch_size):
         outputs[i][0][note_num][0] = sigmoid(outputs[i][0][note_num][0])
-        
+        # print(outputs[i][0][note_num][0])
+        # if note_num == 77:
+            # print("End Timestep")
         outputs[i][0][note_num][1] = sigmoid(outputs[i][0][note_num][1])
     
     sample = np.zeros((batch_size, 1, 1, 2))
@@ -126,12 +128,12 @@ def sampleFromOutputs(outputs):
         
         play = random.uniform(0, 1)
         
-        if play * 2 <= outputs[i][0][note_num][0] and outputs[i][0][note_num][0] > .2: #* 0.5:
+        if play <= outputs[i][0][note_num][0] and outputs[i][0][note_num][0] > .1: #* 0.5:
             sample[i][0][0][0] = 1
         
             articulate = random.uniform(0, 1)
         
-            if articulate * 2 <= outputs[i][0][note_num][1] and outputs[i][0][note_num][1] > .2: #* 0.5:
+            if articulate <= outputs[i][0][note_num][1] and outputs[i][0][note_num][1] > .1: #* 0.5:
                 sample[i][0][0][1] = 1                
     
     return sample

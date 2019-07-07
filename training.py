@@ -68,15 +68,15 @@ def train(model_name, training_set, time_block_outputs, X, hidden_state, generat
                         outputs_run[0][i][j][1] = generate_music.sigmoid(outputs_run[0][i][j][1])
                 
                 print(labels[0][3])
-                file.write("Labels:")
-                np.savetxt("training_progress.txt", labels[0][3], newline="")
+                # file.write("Labels:")
+                # np.savetxt("training_progress.txt", labels[0][3], newline="")
                 print(outputs_run[0][3])
-                file.write("Outputs:")
-                np.savetxt("training_progress.txt", outputs_run[0][3], newline="")
+                # file.write("Outputs:")
+                # np.savetxt("training_progress.txt", outputs_run[0][3], newline="")
                 
                 # Calculate batch loss and accuracy
                 print("Step " + str(step) + ", Loss= " + str(loss_run))
-                file.write("Step " + str(step) + ", Loss= " + str(loss_run))
+                file.write("Step " + str(step) + ", Loss= " + str(loss_run) + "\n")
                 
 
 """                
