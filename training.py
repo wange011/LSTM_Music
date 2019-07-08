@@ -6,7 +6,7 @@ import os
 import utility
 import generate_music
 
-def train(model_name, training_set, time_block_outputs, X, hidden_state, generating_music, y, outputs, loss, train_op, training_parameters):
+def train(model_name, training_set, scales, time_block_outputs, X, hidden_state, generating_music, y, outputs, loss, train_op, notewise_train_op, training_parameters):
     
     working_directory = os.getcwd()
     
@@ -77,7 +77,27 @@ def train(model_name, training_set, time_block_outputs, X, hidden_state, generat
                 # Calculate batch loss and accuracy
                 print("Step " + str(step) + ", Loss= " + str(loss_run))
                 file.write("Step " + str(step) + ", Loss= " + str(loss_run) + "\n")
+            
+            # Pretrain/readjust the network using scale chords
+            # Done after the model is saved so that the saved model is not biased
+            if step % 1000 == 0:
+
+                print("Readjusting Model")                
                 
+                scales = utility.generateBatches(scales, batch_size, 1)
+                
+                for notewise_step in range(1, 101):
+                    
+                    if notewise_step % num_batches == 1 and step != 1:
+                        scales = utility.shuffleBatches(scales)
+                    
+                    batch = scales[(step - 1) % num_batches]
+            
+                    inputs = batch[:, :, :, :53]
+                    labels = batch[:, :, :, 53:]                   
+                    
+                    sess.run([notewise_train_op], feed_dict={X: inputs, hidden_state: np.zeros((batch_size * timesteps, 78, 300)), y: labels})
+                    
 
 """                
 def resumeTraining(model_name, training_set, steps_trained, time_block_outputs, loss, X, hidden_state, y, timesteps, batch_size, remaining_training_steps):

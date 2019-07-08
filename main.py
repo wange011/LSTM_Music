@@ -20,7 +20,8 @@ Dimension 3: Articulation (1 denotes the note was played at the given timestep),
 
 # Gather the training pieces from the specified directories
 # Converts the pieces from noteStateMatrix to the biaxialInputFormat
-training_set, testing_set = utility.loadPianoPieces()   
+training_set, testing_set = utility.loadPianoPieces()
+scales = utility.loadScales()   
 
 tf.reset_default_graph()
 
@@ -65,17 +66,23 @@ loss = model.BiaxialLoss(outputs, y)
 optimizer = tf.train.AdamOptimizer()
 train_op = optimizer.minimize(loss)
 
+
+notewise_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'rnn_1')
+notewise_vars.extend(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'dense'))
+
+notewise_train_op = optimizer.minimize(loss, var_list=notewise_vars)
+
 # Training parameters
 model_name = "BiaxialLSTM"
 timesteps = 128
-batch_size = 5
+batch_size = 10
 steps = 80000
 display_step = 1000
 
 # Training the model
 training_parameters = {"timesteps": timesteps, "batch_size": batch_size, "training_steps": steps, "display_step": display_step}
 
-training.train(model_name, training_set, time_block_outputs, X, hidden_state, generating_music, y, outputs, loss, train_op, training_parameters)
+training.train(model_name, training_set, scales, time_block_outputs, X, hidden_state, generating_music, y, outputs, loss, train_op, notewise_train_op, training_parameters)
 
 """
 # Generating output samples

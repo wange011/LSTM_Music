@@ -8,7 +8,7 @@ def loadPianoPieces():
     music_directory = working_directory + "/training_sets/piano/"
 
     midi_directories = ["albeniz", "beeth", "borodin", "brahms", "burgm", "chopin", "debussy", "granados", "grieg", "haydn", "liszt", "mendelssohn", "mozart", "muss", "schubert", "schumann", "tschai"]
-    max_time_steps = 256 # only files at least this many 16th note steps are saved
+    max_time_steps = 256 # only files with at least this many 16th note steps are saved
     num_testing_pieces = 0
     
     training = {}
@@ -30,6 +30,20 @@ def loadPianoPieces():
         testing[key] = noteStateToBiaxialInput(testing[key])    
     
     return training, testing
+
+def loadScales():
+    working_directory = os.getcwd()
+    music_directory = working_directory + "/training_sets/scales/"
+    
+    max_time_steps = 0
+    scales = {}
+
+    scales = {**scales, **loadPieces(music_directory, max_time_steps)}
+    
+    for key in scales.keys():
+        scales[key] = noteStateToBiaxialInput(scales[key])
+    
+    return scales
 
 def loadPieces(dirpath, max_time_steps):
     pieces = {}
