@@ -34,6 +34,10 @@ def train(model_name, training_set, scales, time_block_outputs, X, hidden_state,
 
         num_batches = training_set.shape[0]
 
+        scales = utility.generateBatches(scales, batch_size, 1)
+
+        num_scale_batches = scales.shape[0]
+
         for step in range(1, training_steps + 1):
             
             # Shuffle the training set between each epoch
@@ -84,14 +88,12 @@ def train(model_name, training_set, scales, time_block_outputs, X, hidden_state,
 
                 print("Readjusting Model")                
                 
-                scales = utility.generateBatches(scales, batch_size, 1)
-                
                 for notewise_step in range(1, 101):
                     
                     if notewise_step % num_batches == 1 and step != 1:
                         scales = utility.shuffleBatches(scales)
                     
-                    batch = scales[(step - 1) % num_batches]
+                    batch = scales[(notewise_step - 1) % num_scale_batches]
             
                     inputs = batch[:, :, :, :53]
                     labels = batch[:, :, :, 53:]                   
