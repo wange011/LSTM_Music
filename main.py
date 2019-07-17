@@ -66,6 +66,9 @@ loss = model.BiaxialLoss(outputs, y)
 optimizer = tf.train.AdamOptimizer()
 train_op = optimizer.minimize(loss)
 
+timewise_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'rnn_0')
+
+timewise_train_op = optimizer.minimize(loss, var_list=timewise_vars)
 
 notewise_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'rnn_1')
 notewise_vars.extend(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'dense'))
@@ -82,7 +85,7 @@ display_step = 1000
 # Training the model
 training_parameters = {"timesteps": timesteps, "batch_size": batch_size, "training_steps": steps, "display_step": display_step}
 
-training.train(model_name, training_set, scales, time_block_outputs, X, hidden_state, generating_music, y, outputs, loss, train_op, notewise_train_op, training_parameters)
+training.train(model_name, training_set, scales, time_block_outputs, X, hidden_state, generating_music, y, outputs, loss, train_op, timewise_train_op, notewise_train_op, training_parameters)
 
 """
 # Generating output samples

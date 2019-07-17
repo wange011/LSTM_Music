@@ -6,7 +6,7 @@ import os
 import utility
 import generate_music
 
-def train(model_name, training_set, scales, time_block_outputs, X, hidden_state, generating_music, y, outputs, loss, train_op, notewise_train_op, training_parameters):
+def train(model_name, training_set, scales, time_block_outputs, X, hidden_state, generating_music, y, outputs, loss, train_op, timewise_train_op, notewise_train_op, training_parameters):
     
     working_directory = os.getcwd()
     
@@ -84,11 +84,29 @@ def train(model_name, training_set, scales, time_block_outputs, X, hidden_state,
             
             # Pretrain/readjust the network using scale chords
             # Done after the model is saved so that the saved model is not biased
+
+            if step % 2000 == 0:
+
+                print("Readjusting Model Timewise")                
+                
+                for timewise_step in range(1, 51):
+                    
+                    if timewise_step % num_batches == 1 and step != 1:
+                        scales = utility.shuffleBatches(scales)
+                    
+                    batch = scales[(timewise_step - 1) % num_scale_batches]
+            
+                    inputs = batch[:, :, :, :53]
+                    labels = batch[:, :, :, 53:]                   
+                    
+                    sess.run([timewise_train_op], feed_dict={X: inputs, hidden_state: np.zeros((batch_size * timesteps, 78, 300)), y: labels})
+            
+            
             if step % 1000 == 0:
 
-                print("Readjusting Model")                
+                print("Readjusting Model Notewise")                
                 
-                for notewise_step in range(1, 101):
+                for notewise_step in range(1, 51):
                     
                     if notewise_step % num_batches == 1 and step != 1:
                         scales = utility.shuffleBatches(scales)
