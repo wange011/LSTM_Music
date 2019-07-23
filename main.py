@@ -66,7 +66,7 @@ loss = model.BiaxialLoss(outputs, y)
 optimizer = tf.train.AdamOptimizer()
 train_op = optimizer.minimize(loss)
 
-timewise_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'rnn_0')
+timewise_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'rnn')
 
 timewise_train_op = optimizer.minimize(loss, var_list=timewise_vars)
 
