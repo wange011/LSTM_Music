@@ -39,7 +39,7 @@ def BiaxialTimeBlock(X, time_hidden_layer_size):
 
     for i in range(2):
         
-        timewise_lstm_stack.append(tf.keras.layers.LSTMCell(time_hidden_layer_size[i]))
+        timewise_lstm_stack.append(tf.keras.layers.LSTMCell(time_hidden_layer_size[i], dropout=.5))
         
         #timewise_lstm_stack.append(DropoutWrapper(BasicLSTMCell(time_hidden_layer_size[i], forget_bias=1.0), output_keep_prob=.5))
 
@@ -93,7 +93,7 @@ def BiaxialNoteBlock(hidden_state, y, note_hidden_layer_size, song_batch_size, s
 
     for i in range(2):
         
-        notewise_lstm_stack.append(tf.keras.layers.LSTMCell(note_hidden_layer_size[i]))
+        notewise_lstm_stack.append(tf.keras.layers.LSTMCell(note_hidden_layer_size[i], dropout=.5))
         #notewise_lstm_stack.append(DropoutWrapper(BasicLSTMCell(note_hidden_layer_size[i], forget_bias=1.0), output_keep_prob=.5))
       
     #notewise_lstm_stack = tf.keras.layers.StackedRNNCells(notewise_lstm_stack)    
