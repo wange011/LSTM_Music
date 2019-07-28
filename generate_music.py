@@ -128,12 +128,12 @@ def sampleFromOutputs(outputs):
         
         play = random.uniform(0, 1)
         
-        if play <= outputs[i][0][note_num][0] and outputs[i][0][note_num][0] > .1: #* 0.5:
+        if play <= outputs[i][0][note_num][0] and outputs[i][0][note_num][0] > .3: #* 0.5:
             sample[i][0][0][0] = 1
         
             articulate = random.uniform(0, 1)
         
-            if articulate <= outputs[i][0][note_num][1] and outputs[i][0][note_num][1] > .1: #* 0.5:
+            if articulate <= outputs[i][0][note_num][1] and outputs[i][0][note_num][1] > .3: #* 0.5:
                 sample[i][0][0][1] = 1                
     
     return sample
@@ -235,10 +235,10 @@ if __name__ == "__main__":
 
     model_name = "BiaxialLSTM"
     
-    output_parameters = {"steps_trained": 50000, "num_pieces": 5, "timesteps": 1600, "display_step": 1000}
+    output_parameters = {"steps_trained": 80000, "num_pieces": 5, "timesteps": 1600, "display_step": 1000}
     pieces = generatePieces(model_name, time_block_outputs, X, hidden_state, generating_music, y, outputs, output_parameters)        
     
     for j in range(len(pieces)):
         print(np.count_nonzero(pieces[j]))
-        utility.generateMIDI(pieces[j], model_name + "_" + str(50000) + "_iterations_test_" + str(j + 1))
+        utility.generateMIDI(pieces[j], model_name + "_" + str(output_parameters["steps_trained"]) + "_iterations_test_" + str(j + 1))
     
